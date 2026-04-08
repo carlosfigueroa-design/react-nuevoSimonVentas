@@ -20,44 +20,12 @@ export function useSessionPersistence(
 ): void {
   const isInitialMount = useRef(true);
 
-  // On mount, restore state from sessionStorage if available
+  // On mount, clear previous session so the wizard always starts fresh
   useEffect(() => {
     try {
-      const stored = sessionStorage.getItem(WIZARD_STORAGE_KEY);
-      if (stored) {
-        const parsed: WizardState = JSON.parse(stored);
-
-        // Restore step data for each step
-        if (parsed.stepData) {
-          dispatch({
-            type: 'SET_STEP_DATA',
-            step: 1,
-            data: { datosRiesgo: parsed.stepData.datosRiesgo },
-          });
-          dispatch({
-            type: 'SET_STEP_DATA',
-            step: 2,
-            data: { coberturas: parsed.stepData.coberturas },
-          });
-          dispatch({
-            type: 'SET_STEP_DATA',
-            step: 3,
-            data: { declaracion: parsed.stepData.declaracion },
-          });
-          dispatch({
-            type: 'SET_STEP_DATA',
-            step: 4,
-            data: { resumen: parsed.stepData.resumen },
-          });
-        }
-
-        // Restore current step
-        if (parsed.currentStep) {
-          dispatch({ type: 'GO_TO_STEP', step: parsed.currentStep });
-        }
-      }
+      sessionStorage.removeItem(WIZARD_STORAGE_KEY);
     } catch {
-      // sessionStorage unavailable or corrupted — app works without persistence
+      // sessionStorage unavailable — ignore
     }
   }, [dispatch]);
 
