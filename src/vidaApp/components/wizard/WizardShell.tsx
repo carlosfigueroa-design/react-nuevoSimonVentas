@@ -1,5 +1,6 @@
 /**
  * Shell del wizard: orquesta stepper, pasos, header de sesión y navegación.
+ * Presentación alineada al estilo del cotizador de Autos.
  * Ramo Vida Individual — Simón Ventas.
  */
 
@@ -68,38 +69,44 @@ function WizardContent(): React.JSX.Element {
   };
 
   return (
-    <div className="wizard-panel mx-auto">
-      {/* Stepper */}
-      <StepperIndicator currentStep={currentStep} completedSteps={completedSteps} />
-
-      {/* Step content with animation */}
-      <div className="relative min-h-[400px]">
-        <AnimatePresence mode="wait" custom={direction}>
-          <motion.div
-            key={currentStep}
-            custom={direction}
-            variants={slideVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={slideTransition}
-          >
-            <Suspense fallback={<div className="flex items-center justify-center py-20"><div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#005931]" /></div>}>
-              <StepComponent />
-            </Suspense>
-          </motion.div>
-        </AnimatePresence>
+    <div className="mx-auto flex flex-col gap-6">
+      {/* Stepper — card blanca como Autos */}
+      <div className="rounded-2xl bg-white shadow-sm border border-gray-100 p-8 overflow-x-auto">
+        <StepperIndicator currentStep={currentStep} completedSteps={completedSteps} />
       </div>
 
-      {/* Navigation Footer */}
-      <NavigationFooter
-        currentStep={currentStep}
-        isStepValid={stepValid}
-        onBack={goToPreviousStep}
-        onNext={goToNextStep}
-        onFinalize={currentStep === 2 ? handleFinalize : undefined}
-        onSubscribe={currentStep === 2 ? handleSubscribe : undefined}
-      />
+      {/* Step content — card blanca con sombra como Autos */}
+      <div className="rounded-2xl bg-white shadow-xl border border-gray-100 overflow-hidden">
+        <div className="p-8 md:p-12">
+          <div className="relative min-h-[400px]">
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.div
+                key={currentStep}
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={slideTransition}
+              >
+                <Suspense fallback={<div className="flex items-center justify-center py-20"><div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#005931]" /></div>}>
+                  <StepComponent />
+                </Suspense>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Navigation Footer */}
+        <NavigationFooter
+          currentStep={currentStep}
+          isStepValid={stepValid}
+          onBack={goToPreviousStep}
+          onNext={goToNextStep}
+          onFinalize={currentStep === 2 ? handleFinalize : undefined}
+          onSubscribe={currentStep === 2 ? handleSubscribe : undefined}
+        />
+      </div>
     </div>
   );
 }

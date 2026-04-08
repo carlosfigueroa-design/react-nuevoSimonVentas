@@ -48,14 +48,11 @@ h6.regular          { font-weight: 400; }
 
 /* --- Panel Central del Wizard --- */
 .wizard-panel {
-  width: 862px;
-  min-height: 937px;
-  margin-top: 100px;
-  border-radius: 12px;
-  padding: 32px 16px;
+  width: 100%;
+  max-width: 1024px;
+  min-height: 600px;
+  border-radius: 16px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  background: white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  gap: 24px;
 }

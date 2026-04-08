@@ -1,9 +1,11 @@
 /**
  * Página principal del wizard Vida Individual.
+ * Presentación alineada al estilo del cotizador de Autos.
  * Ramo Vida Individual — Simón Ventas.
  */
 
 import { useCallback } from 'react';
+import { Heart } from 'lucide-react';
 import { WizardShell } from '../components/wizard';
 
 export interface VidaIndividualPageProps {
@@ -12,24 +14,33 @@ export interface VidaIndividualPageProps {
 
 export function VidaIndividualPage({ onNavigate: _onNavigate }: VidaIndividualPageProps): React.JSX.Element {
   const handleNuevaCotizacion = useCallback(() => {
-    // Clear session and reload wizard from scratch
     sessionStorage.removeItem('vida-individual-wizard-state');
     window.location.reload();
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-6">
-      <div className="mx-auto max-w-4xl">
-        {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-h4 font-bold text-gray-900">Cotización Vida Individual</h1>
-          <button
-            type="button"
-            onClick={handleNuevaCotizacion}
-            className="rounded-md border border-[#005931] px-4 py-2 text-sm font-medium text-[#005931] transition-colors hover:bg-[#005931]/5"
-          >
-            Nueva Cotización
-          </button>
+    <div className="px-4 py-6">
+      <div className="mx-auto max-w-5xl">
+        {/* Header — alineado al estilo de Autos */}
+        <div className="mb-10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#005931]/10">
+                <Heart className="h-7 w-7 text-[#005931]" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold text-[#002B49]">Cotización Vida Individual</h2>
+                <p className="text-gray-500 mt-1">Completa los siguientes pasos para generar la cotización.</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleNuevaCotizacion}
+              className="sb-ui-button sb-ui-button--secondary"
+            >
+              Nueva Cotización
+            </button>
+          </div>
         </div>
 
         {/* Wizard */}
