@@ -96,40 +96,107 @@ function SectionHeader({
   );
 }
 
+/** Mock de personas por número de documento */
+const MOCK_PERSONS: Record<string, Omit<PersonData, 'tipo'>> = {
+  '1129564302': {
+    nombres: 'Carlos Alberto',
+    apellidos: 'Figueroa Martínez',
+    documentType: 'CC',
+    documentNumber: '1129564302',
+    dateOfBirth: '1990-05-15',
+    gender: 'M',
+    email: 'carlos.figueroa@segurosbolivar.com',
+    phone: '3112234545',
+    address: 'Calle 100 #15-20, Bogotá',
+  },
+};
+
 function PersonFields({
-  prefix, data, disabled, errors, onChange,
+  prefix, data, disabled, errors, onChange, onAutoPopulate,
 }: {
   prefix: string; data: PersonData; disabled: boolean;
   errors: Record<string, string>; onChange: (field: string, value: string) => void;
+  onAutoPopulate?: (person: Omit<PersonData, 'tipo'>) => void;
 }): React.JSX.Element {
   const handle = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     onChange(e.target.name, e.target.value);
+
+  const handleDocNumberBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const docNumber = e.target.value.trim();
+    if (docNumber && MOCK_PERSONS[docNumber] && onAutoPopulate) {
+      onAutoPopulate(MOCK_PERSONS[docNumber]);
+    }
+  };
+
+  const hasDocument = !!(data.documentType && data.documentNumber);
+
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-      <FormField label="Nombres" name={`${prefix}_nombres`} value={data.nombres}
-        onChange={handle} error={errors[`${prefix}_nombres`]} required disabled={disabled} />
-      <FormField label="Apellidos" name={`${prefix}_apellidos`} value={data.apellidos}
-        onChange={handle} error={errors[`${prefix}_apellidos`]} required disabled={disabled} />
-      <FormField label="Tipo de documento" name={`${prefix}_documentType`}
-        value={data.documentType} onChange={handle} options={DOCUMENT_TYPE_OPTIONS}
-        error={errors[`${prefix}_documentType`]} required disabled={disabled} />
-      <FormField label="Número de documento" name={`${prefix}_documentNumber`}
-        value={data.documentNumber} onChange={handle}
-        error={errors[`${prefix}_documentNumber`]} required disabled={disabled} />
-      <FormField label="Fecha de nacimiento" name={`${prefix}_dateOfBirth`} type="date"
-        value={data.dateOfBirth} onChange={handle}
-        error={errors[`${prefix}_dateOfBirth`]} required disabled={disabled} />
-      <FormField label="Género" name={`${prefix}_gender`} value={data.gender}
-        onChange={handle} options={GENDER_OPTIONS}
-        error={errors[`${prefix}_gender`]} required disabled={disabled} />
-      <FormField label="Correo electrónico" name={`${prefix}_email`} type="email"
-        value={data.email} onChange={handle}
-        error={errors[`${prefix}_email`]} required disabled={disabled} />
-      <FormField label="Teléfono" name={`${prefix}_phone`} value={data.phone}
-        onChange={handle} error={errors[`${prefix}_phone`]} required disabled={disabled} />
-      <FormField label="Dirección" name={`${prefix}_address`} value={data.address}
-        onChange={handle} error={errors[`${prefix}_address`]} required disabled={disabled}
-        placeholder="Dirección de residencia" />
+    <div className="space-y-4">
+      {/* Primero: Tipo y Número de documento */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <FormField label="Tipo de documento" name={`${prefix}_documentType`}
+          value={data.documentType} onChange={handle} options={DOCUMENT_TYPE_OPTIONS}
+          error={errors[`${prefix}_documentType`]} required disabled={disabled} />
+        <div className="flex flex-col gap-1">
+          <label htmlFor={`field-${prefix}_documentNumber`} className="text-sm font-medium text-gray-700">
+            Número de documento<span className="ml-0.5 text-red-500">*</span>
+          </label>
+          <input
+            id={`field-${prefix}_documentNumber`}
+            name={`${prefix}_documentNumber`}
+            type="text"
+            value={data.documentNumber}
+            onChange={handle}
+            onBlur={handleDocNumberBlur}
+            disabled={disabled}
+            placeholder="Ingresa el número y presiona Tab"
+            aria-invalid={!!errors[`${prefix}_documentNumber`]}
+            className="sb-ui-input w-full"
+          />
+          {errors[`${prefix}_documentNumber`] && (
+            <p className="text-xs text-red-600" role="alert">{errors[`${prefix}_documentNumber`]}</p>
+          )}
+        </div>
+      </div>
+
+      {/* Resto de campos: aparecen cuando hay documento */}
+      <AnimatePresence>
+        {hasDocument && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.3 }}
+          >
+            {data.nombres && (
+              <div className="flex items-center gap-2 mb-4 text-xs text-[#005931]">
+                <CheckCircle size={14} />
+                <span>Datos cargados para: <strong>{data.nombres} {data.apellidos}</strong></span>
+              </div>
+            )}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <FormField label="Nombres" name={`${prefix}_nombres`} value={data.nombres}
+                onChange={handle} error={errors[`${prefix}_nombres`]} required disabled={disabled} />
+              <FormField label="Apellidos" name={`${prefix}_apellidos`} value={data.apellidos}
+                onChange={handle} error={errors[`${prefix}_apellidos`]} required disabled={disabled} />
+              <FormField label="Fecha de nacimiento" name={`${prefix}_dateOfBirth`} type="date"
+                value={data.dateOfBirth} onChange={handle}
+                error={errors[`${prefix}_dateOfBirth`]} required disabled={disabled} />
+              <FormField label="Género" name={`${prefix}_gender`} value={data.gender}
+                onChange={handle} options={GENDER_OPTIONS}
+                error={errors[`${prefix}_gender`]} required disabled={disabled} />
+              <FormField label="Correo electrónico" name={`${prefix}_email`} type="email"
+                value={data.email} onChange={handle}
+                error={errors[`${prefix}_email`]} required disabled={disabled} />
+              <FormField label="Teléfono" name={`${prefix}_phone`} value={data.phone}
+                onChange={handle} error={errors[`${prefix}_phone`]} required disabled={disabled} />
+              <FormField label="Dirección" name={`${prefix}_address`} value={data.address}
+                onChange={handle} error={errors[`${prefix}_address`]} required disabled={disabled}
+                placeholder="Dirección de residencia" />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -294,7 +361,13 @@ export function DatosRiesgo(): React.JSX.Element {
         {openSections.has(3) && (isSection2Complete || isSection3Complete) && (
           <motion.div variants={sectionVariants} initial="hidden" animate="visible" exit="exit" className="overflow-hidden">
             <div className="rounded-2xl bg-white border border-gray-100 shadow-xl p-6 md:p-8">
-              <PersonFields prefix="tomador" data={tomador} disabled={false} errors={allErrors} onChange={handleTomadorChange} />
+              <PersonFields prefix="tomador" data={tomador} disabled={false} errors={allErrors} onChange={handleTomadorChange}
+                onAutoPopulate={(person) => {
+                  updateDatosRiesgo({
+                    tomador: { ...person, tipo: 'tomador' } as typeof tomador,
+                    ...(isSameAsInsured ? { asegurado: { ...person, tipo: 'asegurado' } as typeof asegurado } : {}),
+                  });
+                }} />
             </div>
           </motion.div>
         )}
@@ -315,7 +388,10 @@ export function DatosRiesgo(): React.JSX.Element {
               </label>
 
               {!isSameAsInsured && (
-                <PersonFields prefix="asegurado" data={asegurado} disabled={false} errors={allErrors} onChange={handleAseguradoChange} />
+                <PersonFields prefix="asegurado" data={asegurado} disabled={false} errors={allErrors} onChange={handleAseguradoChange}
+                  onAutoPopulate={(person) => {
+                    updateDatosRiesgo({ asegurado: { ...person, tipo: 'asegurado' } as typeof asegurado });
+                  }} />
               )}
               {isSameAsInsured && (
                 <p className="text-sm text-gray-500 italic">Los datos del tomador se usarán como datos del asegurado.</p>
