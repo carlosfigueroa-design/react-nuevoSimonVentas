@@ -121,14 +121,25 @@ function PersonFields({
   const handle = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     onChange(e.target.name, e.target.value);
 
+  const [docConfirmed, setDocConfirmed] = useState(false);
+
   const handleDocNumberBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     const docNumber = e.target.value.trim();
-    if (docNumber && MOCK_PERSONS[docNumber] && onAutoPopulate) {
+    if (!docNumber || !data.documentType) return;
+    setDocConfirmed(true);
+    if (MOCK_PERSONS[docNumber] && onAutoPopulate) {
       onAutoPopulate(MOCK_PERSONS[docNumber]);
     }
   };
 
-  const hasDocument = !!(data.documentType && data.documentNumber);
+  // Reset confirmation if document number changes
+  const prevDocRef = React.useRef(data.documentNumber);
+  useEffect(() => {
+    if (data.documentNumber !== prevDocRef.current) {
+      setDocConfirmed(false);
+      prevDocRef.current = data.documentNumber;
+    }
+  }, [data.documentNumber]);
 
   return (
     <div className="space-y-4">
@@ -159,9 +170,9 @@ function PersonFields({
         </div>
       </div>
 
-      {/* Resto de campos: aparecen cuando hay documento */}
+      {/* Resto de campos: aparecen solo después de confirmar documento (blur) */}
       <AnimatePresence>
-        {hasDocument && (
+        {docConfirmed && (
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
