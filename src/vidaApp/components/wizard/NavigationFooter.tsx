@@ -1,5 +1,6 @@
 /**
  * Barra de acción fija (footer) con navegación del wizard.
+ * Usa sb-ui-button del Design System Seguros Bolívar.
  * Ramo Vida Individual — Simón Ventas.
  */
 
@@ -35,10 +36,8 @@ export function NavigationFooter({
           onClick={onBack}
           disabled={isFirstStep}
           aria-disabled={isFirstStep}
-          className={`flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
-            isFirstStep
-              ? 'border-gray-200 text-gray-300 cursor-not-allowed opacity-50'
-              : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+          className={`sb-ui-button sb-ui-button--secondary sb-ui-button--icon-left ${
+            isFirstStep ? 'sb-ui-button--disabled' : ''
           }`}
         >
           <ArrowLeft className="h-4 w-4" />
@@ -53,10 +52,8 @@ export function NavigationFooter({
               onClick={onFinalize}
               disabled={!isStepValid}
               aria-disabled={!isStepValid}
-              className={`flex items-center gap-1.5 rounded-md border border-[#005931] px-4 py-2 text-sm font-medium transition-colors ${
-                isStepValid
-                  ? 'text-[#005931] hover:bg-[#005931]/5'
-                  : 'opacity-50 cursor-not-allowed text-[#005931]/50'
+              className={`sb-ui-button sb-ui-button--primary sb-ui-button--icon-left ${
+                !isStepValid ? 'sb-ui-button--disabled' : ''
               }`}
             >
               <FileCheck className="h-4 w-4" />
@@ -70,10 +67,8 @@ export function NavigationFooter({
               onClick={onSubscribe}
               disabled={!isStepValid}
               aria-disabled={!isStepValid}
-              className={`flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
-                isStepValid
-                  ? 'bg-[#FFD100] text-gray-900 hover:bg-[#FFD100]/90'
-                  : 'bg-[#FFD100]/50 text-gray-900/50 opacity-50 cursor-not-allowed'
+              className={`sb-ui-button sb-ui-button--secondary sb-ui-button--fill sb-ui-button--icon-left ${
+                !isStepValid ? 'sb-ui-button--disabled' : ''
               }`}
             >
               <ClipboardCheck className="h-4 w-4" />
@@ -85,10 +80,8 @@ export function NavigationFooter({
               onClick={onNext}
               disabled={!isStepValid}
               aria-disabled={!isStepValid}
-              className={`flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
-                isStepValid
-                  ? 'bg-[#FFD100] text-gray-900 hover:bg-[#FFD100]/90'
-                  : 'bg-[#FFD100]/50 text-gray-900/50 opacity-50 cursor-not-allowed'
+              className={`sb-ui-button sb-ui-button--primary sb-ui-button--fill sb-ui-button--icon-right ${
+                !isStepValid ? 'sb-ui-button--disabled' : ''
               }`}
             >
               Continuar

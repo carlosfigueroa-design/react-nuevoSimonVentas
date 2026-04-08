@@ -1,7 +1,7 @@
 /**
  * Acordeón colapsable para preguntas de salud por categoría.
  * Botones segmentados SÍ/NO (sin toggle).
- * Verde para NO, Amarillo Bolívar para SÍ, estado neutro inicial.
+ * Usa sb-ui-accordion del Design System Seguros Bolívar.
  * Ramo Vida Individual — Simón Ventas.
  */
 
@@ -33,7 +33,7 @@ export function HealthAccordion({
   };
 
   return (
-    <div className="divide-y divide-gray-200 rounded-lg border border-gray-200">
+    <div className="sb-ui-accordion sb-ui-accordion--secondary">
       {categories.map((cat) => {
         const isOpen = openSections.has(cat.id);
         const answeredCount = cat.questions.filter(
@@ -49,25 +49,25 @@ export function HealthAccordion({
               type="button"
               onClick={() => toggle(cat.id)}
               aria-expanded={isOpen}
-              className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-medium text-gray-800 transition-colors hover:bg-gray-50"
+              className="sb-ui-accordion__header"
             >
-              <div className="flex items-center gap-2">
+              <span className="sb-ui-accordion__label">
                 {cat.name}
-                <span className="text-xs text-gray-400">
+                <span className="sb-ui-text-caption text-gray-400 ml-2">
                   ({answeredCount}/{totalRequired})
                 </span>
-              </div>
+              </span>
               <ChevronDown
-                className={`h-4 w-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                className={`sb-ui-accordion__icon-end h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
                 aria-hidden
               />
             </button>
 
             {isOpen && (
-              <div className="space-y-3 px-4 pb-4">
+              <div className="sb-ui-accordion__content space-y-3 px-4 pb-4">
                 {cat.questions.map((q) => (
                   <div key={q.id} className="flex flex-col gap-1.5">
-                    <span className="text-xs text-gray-700">
+                    <span className="sb-ui-text-caption text-gray-700">
                       {q.text}
                       {q.required && <span className="ml-0.5 text-red-500">*</span>}
                     </span>
@@ -87,7 +87,7 @@ export function HealthAccordion({
                         value={answers[q.id] !== undefined ? String(answers[q.id]) : ''}
                         onChange={(e) => onAnswerChange(q.id, Number(e.target.value))}
                         disabled={disabled}
-                        className="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-[#005931] focus:outline-none focus:ring-1 focus:ring-[#005931]/15 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        className={`sb-ui-input sb-ui-input--small ${disabled ? 'sb-ui-input--disabled' : ''}`}
                       />
                     ) : (
                       <textarea
@@ -96,7 +96,7 @@ export function HealthAccordion({
                         value={answers[q.id] !== undefined ? String(answers[q.id]) : ''}
                         onChange={(e) => onAnswerChange(q.id, e.target.value)}
                         disabled={disabled}
-                        className="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-[#005931] focus:outline-none focus:ring-1 focus:ring-[#005931]/15 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        className={`sb-ui-textarea sb-ui-textarea--small ${disabled ? 'sb-ui-textarea--loading' : ''}`}
                       />
                     )}
                   </div>
@@ -111,7 +111,7 @@ export function HealthAccordion({
 }
 
 
-/** Componente de decisión binaria SÍ/NO — Selección unificada con Verde Corporativo */
+/** Componente de decisión binaria SÍ/NO — Usa sb-ui-button del DS */
 function BinarySelector({
   questionId,
   questionText,
@@ -134,11 +134,12 @@ function BinarySelector({
         aria-label={`${questionText} — SÍ`}
         disabled={disabled}
         onClick={() => onChange(true)}
-        className={`rounded-l-lg px-5 py-1.5 text-xs font-semibold uppercase tracking-wide transition-all duration-200 ${
+        className={`sb-ui-button sb-ui-button--small ${
           value === true
-            ? 'bg-[#005931] text-white shadow-sm'
-            : 'border border-r-0 border-gray-300 bg-white text-gray-500 hover:bg-gray-50'
-        } ${disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
+            ? 'sb-ui-button--primary sb-ui-button--fill'
+            : 'sb-ui-button--secondary'
+        } ${disabled ? 'sb-ui-button--disabled' : ''}`}
+        style={{ borderRadius: '8px 0 0 8px' }}
       >
         SÍ
       </button>
@@ -149,11 +150,12 @@ function BinarySelector({
         aria-label={`${questionText} — NO`}
         disabled={disabled}
         onClick={() => onChange(false)}
-        className={`rounded-r-lg px-5 py-1.5 text-xs font-semibold uppercase tracking-wide transition-all duration-200 ${
+        className={`sb-ui-button sb-ui-button--small ${
           value === false
-            ? 'bg-[#005931] text-white shadow-sm'
-            : 'border border-l-0 border-gray-300 bg-white text-gray-500 hover:bg-gray-50'
-        } ${disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
+            ? 'sb-ui-button--primary sb-ui-button--fill'
+            : 'sb-ui-button--secondary'
+        } ${disabled ? 'sb-ui-button--disabled' : ''}`}
+        style={{ borderRadius: '0 8px 8px 0' }}
       >
         NO
       </button>

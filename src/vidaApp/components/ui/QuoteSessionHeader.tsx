@@ -1,6 +1,7 @@
 /**
  * Barra de sesión de cotización visible durante todo el wizard.
  * Muestra número de cotización, fecha y clave de asesor.
+ * Usa sb-ui-input, sb-ui-badge del Design System Seguros Bolívar.
  * Ramo Vida Individual — Simón Ventas.
  */
 
@@ -23,14 +24,14 @@ export function QuoteSessionHeader({
   isAdvisorValid,
 }: QuoteSessionHeaderProps): React.JSX.Element {
   return (
-    <div className="flex flex-wrap items-center gap-4 rounded-lg bg-[#005931]/5 px-4 py-2.5 text-sm">
+    <div className="sb-ui-card sb-ui-card--outlined flex flex-wrap items-center gap-4 bg-[#005931]/5 px-4 py-2.5">
       <div className="flex items-center gap-1.5 text-[#005931]">
         <FileText className="h-4 w-4" />
-        <span className="font-medium">{quoteNumber}</span>
+        <span className="sb-ui-text-label font-medium">{quoteNumber}</span>
       </div>
       <div className="flex items-center gap-1.5 text-gray-600">
         <Calendar className="h-4 w-4" />
-        <span>{formatDate(quoteDate)}</span>
+        <span className="sb-ui-text-body">{formatDate(quoteDate)}</span>
       </div>
       <div className="flex items-center gap-1.5">
         <KeyRound className="h-4 w-4 text-gray-500" />
@@ -40,10 +41,8 @@ export function QuoteSessionHeader({
           onChange={(e) => onAdvisorKeyChange(e.target.value)}
           placeholder="Clave Asesor"
           aria-label="Clave de Asesor"
-          className={`w-28 rounded border px-2 py-1 text-xs transition-colors focus:outline-none focus:ring-1 ${
-            advisorKey && !isAdvisorValid
-              ? 'border-red-400 focus:ring-red-300'
-              : 'border-gray-300 focus:ring-[#005931]/30 focus:border-[#005931]'
+          className={`sb-ui-input sb-ui-input--small w-28 ${
+            advisorKey && !isAdvisorValid ? 'sb-ui-input--error' : ''
           }`}
         />
       </div>

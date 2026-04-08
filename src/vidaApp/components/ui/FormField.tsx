@@ -1,6 +1,7 @@
 /**
  * Campo de formulario reutilizable con label, input, validación y estado de error.
  * Soporta máscara de moneda colombiana.
+ * Usa clases sb-ui-input y sb-ui-select del Design System Seguros Bolívar.
  * Ramo Vida Individual — Simón Ventas.
  */
 
@@ -37,12 +38,17 @@ export function FormField({
   const inputId = `field-${name}`;
   const errorId = `${inputId}-error`;
 
-  const baseClasses =
-    'w-full rounded-md border px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2';
-  const stateClasses = error
-    ? 'border-red-500 focus:ring-red-300'
-    : 'border-gray-300 focus:ring-2 focus:ring-[#005931]/15 focus:border-[#005931]';
-  const disabledClasses = disabled ? 'bg-gray-100 cursor-not-allowed opacity-60' : 'bg-white';
+  const inputClasses = [
+    'sb-ui-input',
+    error ? 'sb-ui-input--error' : '',
+    disabled ? 'sb-ui-input--disabled' : '',
+  ].filter(Boolean).join(' ');
+
+  const selectClasses = [
+    'sb-ui-select',
+    error ? 'sb-ui-select--error' : '',
+    disabled ? 'sb-ui-select--disabled' : '',
+  ].filter(Boolean).join(' ');
 
   const handleCurrencyChange = (e: ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.replace(/\./g, '').replace(/\D/g, '');
@@ -54,39 +60,39 @@ export function FormField({
       ...e,
       target: { ...e.target, name, value: String(numeric) },
     } as ChangeEvent<HTMLInputElement>;
-    // Update the display value via a ref trick — we set the input value directly
     e.target.value = formatted;
     onChange(syntheticEvent);
   };
 
   return (
-    <div className="flex flex-col gap-1">
-      <label htmlFor={inputId} className="text-sm font-medium text-gray-700">
+    <div className="sb-ui-input-container">
+      <label htmlFor={inputId} className={`sb-ui-input-label ${required ? 'sb-ui-input-label--required' : ''}`}>
         {label}
-        {required && <span className="ml-0.5 text-red-500">*</span>}
       </label>
 
       {options ? (
-        <select
-          id={inputId}
-          name={name}
-          value={value}
-          onChange={onChange}
-          disabled={disabled}
-          aria-invalid={!!error}
-          aria-describedby={error ? errorId : undefined}
-          className={`${baseClasses} ${stateClasses} ${disabledClasses}`}
-        >
-          <option value="">{placeholder ?? 'Seleccione...'}</option>
-          {options.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
+        <div className="sb-ui-select-container">
+          <select
+            id={inputId}
+            name={name}
+            value={value}
+            onChange={onChange}
+            disabled={disabled}
+            aria-invalid={!!error}
+            aria-describedby={error ? errorId : undefined}
+            className={selectClasses}
+          >
+            <option value="">{placeholder ?? 'Seleccione...'}</option>
+            {options.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
       ) : mask === 'currency' ? (
-        <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">$</span>
+        <div className="sb-ui-input-inner">
+          <span className="sb-ui-input-icon" style={{ pointerEvents: 'none' }}>$</span>
           <input
             id={inputId}
             name={name}
@@ -102,7 +108,7 @@ export function FormField({
             placeholder={placeholder ?? '0'}
             aria-invalid={!!error}
             aria-describedby={error ? errorId : undefined}
-            className={`${baseClasses} ${stateClasses} ${disabledClasses} pl-7`}
+            className={`${inputClasses} sb-ui-input--with-icon`}
           />
         </div>
       ) : (
@@ -116,12 +122,12 @@ export function FormField({
           placeholder={placeholder}
           aria-invalid={!!error}
           aria-describedby={error ? errorId : undefined}
-          className={`${baseClasses} ${stateClasses} ${disabledClasses}`}
+          className={inputClasses}
         />
       )}
 
       {error && (
-        <p id={errorId} className="text-xs text-red-600" role="alert">
+        <p id={errorId} className="sb-ui-input-helper sb-ui-select-helper--error" role="alert">
           {error}
         </p>
       )}

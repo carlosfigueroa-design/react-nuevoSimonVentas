@@ -1,5 +1,6 @@
 /**
  * Selector Natural/Jurídica con campos condicionales de Representante Legal.
+ * Usa sb-ui-button, sb-ui-card del Design System Seguros Bolívar.
  * Ramo Vida Individual — Simón Ventas.
  */
 
@@ -23,17 +24,17 @@ export function TipoPersonaToggle({
   return (
     <div className="space-y-4">
       <fieldset>
-        <legend className="text-sm font-medium text-gray-700">Tipo de Persona</legend>
+        <legend className="sb-ui-input-label">Tipo de Persona</legend>
         <div className="mt-2 flex gap-2">
           {(['natural', 'juridica'] as const).map((tipo) => (
             <button
               key={tipo}
               type="button"
               onClick={() => onChange(tipo)}
-              className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+              className={`sb-ui-button ${
                 value === tipo
-                  ? 'bg-[#005931] text-white'
-                  : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                  ? 'sb-ui-button--primary sb-ui-button--fill'
+                  : 'sb-ui-button--secondary'
               }`}
             >
               {tipo === 'natural' ? 'Natural' : 'Jurídica'}
@@ -43,8 +44,8 @@ export function TipoPersonaToggle({
       </fieldset>
 
       {value === 'juridica' && (
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 space-y-3">
-          <h3 className="text-h6 font-semibold text-gray-800">Representante Legal</h3>
+        <div className="sb-ui-card sb-ui-card--outlined p-4 space-y-3 bg-gray-50">
+          <h3 className="sb-ui-heading-h6 font-semibold text-gray-800">Representante Legal</h3>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <FormField
               label="Nombre completo"

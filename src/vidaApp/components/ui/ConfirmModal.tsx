@@ -2,6 +2,7 @@
  * Modal de confirmación con animación Framer Motion.
  * Soporta variante de advertencia (extraprima).
  * Se renderiza como portal en document.body.
+ * Usa clases sb-ui-button del Design System Seguros Bolívar.
  * Ramo Vida Individual — Simón Ventas.
  */
 
@@ -79,7 +80,7 @@ export function ConfirmModal({
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-title"
-            className={`relative z-10 mx-4 w-full max-w-md rounded-xl bg-white p-6 shadow-xl ${
+            className={`sb-ui-card sb-ui-card--elevated relative z-10 mx-4 w-full max-w-md p-6 ${
               isWarning ? 'border-2 border-[#FFD100]' : ''
             }`}
             initial={{ scale: 0.9, opacity: 0 }}
@@ -94,10 +95,10 @@ export function ConfirmModal({
                 </div>
               )}
               <div>
-                <h2 id="modal-title" className="text-h6 font-semibold text-gray-900">
+                <h2 id="modal-title" className="sb-ui-heading-h6 font-semibold text-gray-900">
                   {title}
                 </h2>
-                <p className="mt-2 text-sm text-gray-600">{message}</p>
+                <p className="mt-2 sb-ui-text-body text-gray-600">{message}</p>
               </div>
             </div>
 
@@ -105,17 +106,17 @@ export function ConfirmModal({
               <button
                 type="button"
                 onClick={onCancel}
-                className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                className="sb-ui-button sb-ui-button--secondary"
               >
                 {cancelLabel}
               </button>
               <button
                 type="button"
                 onClick={onConfirm}
-                className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+                className={`sb-ui-button ${
                   isWarning
-                    ? 'bg-[#FFD100] text-gray-900 hover:bg-[#FFD100]/90'
-                    : 'bg-[#005931] text-white hover:bg-[#005931]/90'
+                    ? 'sb-ui-button--secondary sb-ui-button--fill'
+                    : 'sb-ui-button--primary sb-ui-button--fill'
                 }`}
               >
                 {confirmLabel}

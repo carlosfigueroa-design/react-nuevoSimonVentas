@@ -1,6 +1,7 @@
 /**
  * Tarjeta destacada en Verde Bolívar con prima mensual total.
  * Desglose: cobertura básica + anexos + recargo salud + ahorro.
+ * Usa sb-ui-card del Design System Seguros Bolívar.
  * Ramo Vida Individual — Simón Ventas.
  */
 
@@ -22,13 +23,13 @@ export function PriceHero({
   savings,
 }: PriceHeroProps): React.JSX.Element {
   return (
-    <div className="rounded-xl bg-[#005931] p-6 text-white">
-      <p className="text-xs font-medium uppercase tracking-wider text-white/70">
+    <div className="sb-ui-card sb-ui-card--elevated rounded-xl bg-[#005931] p-6 text-white">
+      <p className="sb-ui-text-caption font-medium uppercase tracking-wider text-white/70">
         Prima Mensual Total
       </p>
-      <p className="mt-2 text-4xl font-bold">${formatCurrency(totalPrima)}</p>
+      <p className="mt-2 sb-ui-heading-h2 font-bold">${formatCurrency(totalPrima)}</p>
 
-      <div className="mt-4 space-y-1.5 border-t border-white/20 pt-4 text-sm">
+      <div className="mt-4 space-y-1.5 border-t border-white/20 pt-4">
         <BreakdownRow label="Cobertura básica" value={basicCoverage} />
         <BreakdownRow label="Anexos opcionales" value={annexes} />
         {healthSurcharge > 0 && (
@@ -42,7 +43,7 @@ export function PriceHero({
 
 function BreakdownRow({ label, value }: { label: string; value: number }): React.JSX.Element {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between sb-ui-text-body">
       <span className="text-white/80">{label}</span>
       <span className="font-medium">${formatCurrency(value)}</span>
     </div>

@@ -1,6 +1,7 @@
 /**
  * Pantalla de éxito post-emisión con número de póliza.
  * Variante para cotización provisoria (~20% fuera de política).
+ * Usa sb-ui-button, sb-ui-card del Design System Seguros Bolívar.
  * Ramo Vida Individual — Simón Ventas.
  */
 
@@ -28,35 +29,35 @@ export function EmisionExito({
       )}
 
       <div className="space-y-2">
-        <h1 className="text-h3 font-bold text-gray-900">
+        <h1 className="sb-ui-heading-h3 font-bold text-gray-900">
           {isProvisoria ? 'Cotización Provisoria Generada' : '¡Póliza Emitida Exitosamente!'}
         </h1>
-        <p className="text-sm text-gray-600">
+        <p className="sb-ui-text-body text-gray-600">
           {isProvisoria
             ? 'Su cotización será revisada por el equipo de Operaciones.'
             : 'La póliza ha sido emitida correctamente.'}
         </p>
       </div>
 
-      <div className="rounded-lg bg-gray-50 px-6 py-4">
-        <p className="text-xs text-gray-500 uppercase tracking-wider">
+      <div className="sb-ui-card sb-ui-card--outlined px-6 py-4">
+        <p className="sb-ui-text-caption text-gray-500 uppercase tracking-wider">
           {isProvisoria ? 'Número de Cotización' : 'Número de Póliza'}
         </p>
-        <p className="mt-1 text-xl font-bold text-[#005931]">{policyNumber}</p>
+        <p className="mt-1 sb-ui-heading-h4 font-bold text-[#005931]">{policyNumber}</p>
       </div>
 
       <div className="flex gap-3">
         <button
           type="button"
           onClick={onDashboard}
-          className="rounded-md border border-gray-300 px-6 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          className="sb-ui-button sb-ui-button--secondary"
         >
           Volver al Dashboard
         </button>
         <button
           type="button"
           onClick={onNuevaCotizacion}
-          className="rounded-md bg-[#005931] px-6 py-2.5 text-sm font-medium text-white hover:bg-[#005931]/90 transition-colors"
+          className="sb-ui-button sb-ui-button--primary sb-ui-button--fill"
         >
           Nueva Cotización
         </button>

@@ -1,5 +1,6 @@
 /**
  * Dropdown de selección de plan de vida (5 productos).
+ * Usa sb-ui-select del Design System Seguros Bolívar.
  * Ramo Vida Individual — Simón Ventas.
  */
 
@@ -14,9 +15,9 @@ export interface PlanSelectorProps {
 
 export function PlanSelector({ value, onChange, error }: PlanSelectorProps): React.JSX.Element {
   return (
-    <div className="flex flex-col gap-1">
-      <label htmlFor="plan-selector" className="text-sm font-medium text-gray-700">
-        Plan de Vida <span className="text-red-500">*</span>
+    <div className="sb-ui-select-container">
+      <label htmlFor="plan-selector" className="sb-ui-select-label sb-ui-select-label--required">
+        Plan de Vida
       </label>
       <select
         id="plan-selector"
@@ -24,11 +25,7 @@ export function PlanSelector({ value, onChange, error }: PlanSelectorProps): Rea
         onChange={(e) => onChange(e.target.value as PlanVida)}
         aria-invalid={!!error}
         aria-describedby={error ? 'plan-selector-error' : undefined}
-        className={`w-full rounded-md border px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 ${
-          error
-            ? 'border-red-500 focus:ring-red-300'
-            : 'border-gray-300 focus:ring-2 focus:ring-[#005931]/15 focus:border-[#005931]'
-        }`}
+        className={`sb-ui-select ${error ? 'sb-ui-select--error' : ''}`}
       >
         <option value="">Seleccione un plan...</option>
         {PLAN_OPTIONS.map((opt) => (
@@ -38,7 +35,7 @@ export function PlanSelector({ value, onChange, error }: PlanSelectorProps): Rea
         ))}
       </select>
       {error && (
-        <p id="plan-selector-error" className="text-xs text-red-600" role="alert">
+        <p id="plan-selector-error" className="sb-ui-select-helper sb-ui-select-helper--error" role="alert">
           {error}
         </p>
       )}

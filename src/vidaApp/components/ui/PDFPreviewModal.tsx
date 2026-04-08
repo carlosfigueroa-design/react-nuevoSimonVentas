@@ -1,6 +1,7 @@
 /**
  * Modal con vista previa del PDF de cotización.
  * Focus trap para accesibilidad.
+ * Usa sb-ui-button, sb-ui-card del Design System Seguros Bolívar.
  * Ramo Vida Individual — Simón Ventas.
  */
 
@@ -98,13 +99,13 @@ export function PDFPreviewModal({
             role="dialog"
             aria-modal="true"
             aria-labelledby="pdf-modal-title"
-            className="relative z-10 mx-4 w-full max-w-2xl rounded-xl bg-white p-6 shadow-xl"
+            className="sb-ui-card sb-ui-card--elevated relative z-10 mx-4 w-full max-w-2xl p-6"
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
           >
             <div className="flex items-center justify-between">
-              <h2 id="pdf-modal-title" className="text-h6 font-semibold text-gray-900">
+              <h2 id="pdf-modal-title" className="sb-ui-heading-h6 font-semibold text-gray-900">
                 Vista Previa — {quoteNumber}
               </h2>
               <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600">
@@ -113,15 +114,19 @@ export function PDFPreviewModal({
             </div>
 
             <div className="mt-4 min-h-[300px] rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center">
-              {loading && <p className="text-sm text-gray-400">Generando PDF...</p>}
+              {loading && (
+                <div className="sb-ui-spinner sb-ui-spinner--integrated">
+                  <span className="sb-ui-spinner__label">Generando PDF...</span>
+                </div>
+              )}
               {error && (
                 <div className="flex flex-col items-center gap-3 text-center">
                   <AlertCircle className="h-8 w-8 text-red-400" />
-                  <p className="text-sm text-red-600">{error}</p>
+                  <p className="sb-ui-text-body text-red-600">{error}</p>
                   <button
                     type="button"
                     onClick={generate}
-                    className="flex items-center gap-1.5 rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200"
+                    className="sb-ui-button sb-ui-button--secondary sb-ui-button--small sb-ui-button--icon-left"
                   >
                     <RefreshCw className="h-3.5 w-3.5" />
                     Reintentar
@@ -129,7 +134,7 @@ export function PDFPreviewModal({
                 </div>
               )}
               {!loading && !error && pdfUrl && (
-                <p className="text-sm text-gray-500">
+                <p className="sb-ui-text-body text-gray-500">
                   Documento de cotización {quoteNumber} listo para descarga.
                 </p>
               )}
@@ -139,7 +144,7 @@ export function PDFPreviewModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className="sb-ui-button sb-ui-button--secondary"
               >
                 Cerrar
               </button>
@@ -147,7 +152,9 @@ export function PDFPreviewModal({
                 type="button"
                 onClick={handleDownload}
                 disabled={!!error || loading}
-                className="flex items-center gap-1.5 rounded-md bg-[#005931] px-4 py-2 text-sm font-medium text-white hover:bg-[#005931]/90 disabled:opacity-50"
+                className={`sb-ui-button sb-ui-button--primary sb-ui-button--fill sb-ui-button--icon-left ${
+                  (!!error || loading) ? 'sb-ui-button--disabled' : ''
+                }`}
               >
                 <Download className="h-4 w-4" />
                 Descargar PDF
