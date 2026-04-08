@@ -1,10 +1,13 @@
 /**
  * Paso 1: Datos del Riesgo — Captura de Tomador, Asegurado, Plan, Tipo Persona y Datos Financieros.
+ * Revelación progresiva: cada sección aparece al completar la anterior.
  * Ramo Vida Individual — Simón Ventas.
  */
 
-import { useCallback } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import type { ChangeEvent } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { CheckCircle, ChevronDown, User, Shield, Briefcase, FileText } from 'lucide-react';
 import { useWizard, useValidation, useAgeValidation } from '../../hooks';
 import { validateEmail } from '../../utils';
 import { FormField, BentoCard } from '../ui';
@@ -31,29 +34,79 @@ const EMPTY_PERSON: PersonData = {
   dateOfBirth: '', gender: '', email: '', phone: '', address: '',
 };
 
-/** Simula validación de clave de intermediario */
 const MOCK_ADVISORS: Record<string, string> = {
   'AS-998877': 'Carlos Andrés Martínez',
   'AS-112233': 'María Fernanda López',
   'AS-445566': 'Juan Pablo Rodríguez',
 };
 
-function PersonFields({
-  prefix,
-  data,
-  disabled,
-  errors,
-  onChange,
+/** Animación de entrada para secciones */
+const sectionVariants = {
+  hidden: { opacity: 0, y: 20, height: 0 },
+  visible: { opacity: 1, y: 0, height: 'auto', transition: { duration: 0.4 } },
+  exit: { opacity: 0, y: -10, height: 0, transition: { duration: 0.2 } },
+} as const;
+
+/** Header de sección colapsable */
+function SectionHeader({
+  icon: Icon,
+  title,
+  subtitle,
+  stepNumber,
+  isComplete,
+  isOpen,
+  onToggle,
+  isVisible,
 }: {
-  prefix: string;
-  data: PersonData;
-  disabled: boolean;
-  errors: Record<string, string>;
-  onChange: (field: string, value: string) => void;
+  icon: React.FC<{ className?: string; size?: number }>;
+  title: string;
+  subtitle: string;
+  stepNumber: number;
+  isComplete: boolean;
+  isOpen: boolean;
+  onToggle: () => void;
+  isVisible: boolean;
+}): React.JSX.Element | null {
+  if (!isVisible) return null;
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, delay: 0.1 }}
+    >
+      <button
+        type="button"
+        onClick={onToggle}
+        className="w-full rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all px-6 py-4"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className={`flex h-10 w-10 items-center justify-center rounded-xl transition-colors ${
+              isComplete ? 'bg-[#005931] text-white' : 'bg-[#005931]/10 text-[#005931]'
+            }`}>
+              {isComplete ? <CheckCircle size={20} /> : <Icon size={20} />}
+            </div>
+            <div className="text-left">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Sección {stepNumber}</p>
+              <h3 className="text-sm font-bold text-[#002B49]">{title}</h3>
+              <p className="text-xs text-gray-400">{subtitle}</p>
+            </div>
+          </div>
+          <ChevronDown className={`h-5 w-5 text-gray-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+        </div>
+      </button>
+    </motion.div>
+  );
+}
+
+function PersonFields({
+  prefix, data, disabled, errors, onChange,
+}: {
+  prefix: string; data: PersonData; disabled: boolean;
+  errors: Record<string, string>; onChange: (field: string, value: string) => void;
 }): React.JSX.Element {
   const handle = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     onChange(e.target.name, e.target.value);
-
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       <FormField label="Nombres" name={`${prefix}_nombres`} value={data.nombres}
@@ -84,23 +137,65 @@ function PersonFields({
   );
 }
 
+
 export function DatosRiesgo(): React.JSX.Element {
   const { state, dispatch } = useWizard();
   const { errors, validateField } = useValidation();
   const dr = state.stepData.datosRiesgo;
   const { tomador, asegurado, isSameAsInsured } = dr;
 
-  // Age validation for asegurado
   const aseguradoDob = isSameAsInsured ? tomador.dateOfBirth : asegurado.dateOfBirth;
   const { age, isValid: isAgeValid, errorMessage: ageError } = useAgeValidation(aseguradoDob);
 
+  // Section open/close state — all start open for the first visible one
+  const [openSections, setOpenSections] = useState<Set<number>>(() => new Set([1]));
+
+  const toggleSection = useCallback((n: number) => {
+    setOpenSections(prev => {
+      const next = new Set(prev);
+      next.has(n) ? next.delete(n) : next.add(n);
+      return next;
+    });
+  }, []);
+
+  // Completion checks for progressive reveal
+  const isSection1Complete = useMemo(() => !!dr.claveIntermediario && !!dr.nombreAsesor, [dr.claveIntermediario, dr.nombreAsesor]);
+  const isSection2Complete = useMemo(() => !!dr.plan, [dr.plan]);
+  const isSection3Complete = useMemo(() => {
+    const t = tomador;
+    return !!(t.nombres && t.apellidos && t.documentType && t.documentNumber && t.dateOfBirth && t.gender && t.email && t.phone);
+  }, [tomador]);
+  const isSection4Complete = useMemo(() => {
+    if (isSameAsInsured) return true;
+    const a = asegurado;
+    return !!(a.nombres && a.apellidos && a.documentType && a.documentNumber && a.dateOfBirth && a.gender && a.email && a.phone);
+  }, [asegurado, isSameAsInsured]);
+
+  // Auto-open next section when current completes
+  useEffect(() => {
+    if (isSection1Complete && !openSections.has(2)) {
+      setOpenSections(prev => new Set([...prev, 2]));
+    }
+  }, [isSection1Complete]);
+  useEffect(() => {
+    if (isSection2Complete && !openSections.has(3)) {
+      setOpenSections(prev => new Set([...prev, 3]));
+    }
+  }, [isSection2Complete]);
+  useEffect(() => {
+    if (isSection3Complete && !openSections.has(4)) {
+      setOpenSections(prev => new Set([...prev, 4]));
+    }
+  }, [isSection3Complete]);
+  useEffect(() => {
+    if (isSection4Complete && !openSections.has(5)) {
+      setOpenSections(prev => new Set([...prev, 5]));
+    }
+  }, [isSection4Complete]);
+
   const updateDatosRiesgo = useCallback(
     (patch: Partial<typeof dr>) => {
-      dispatch({
-        type: 'SET_STEP_DATA',
-        step: 1,
-        data: { datosRiesgo: { ...dr, ...patch } },
-      });
+      dispatch({ type: 'SET_STEP_DATA', step: 1, data: { datosRiesgo: { ...dr, ...patch } } });
     },
     [dr, dispatch],
   );
@@ -110,17 +205,10 @@ export function DatosRiesgo(): React.JSX.Element {
       const rawField = field.replace(/^(tomador|asegurado)_/, '');
       const updatedPerson = { ...dr[role], [rawField]: value };
       const patch: Record<string, unknown> = { [role]: updatedPerson };
-
       if (role === 'tomador' && isSameAsInsured) {
         patch.asegurado = { ...updatedPerson, tipo: 'asegurado' };
       }
-
-      dispatch({
-        type: 'SET_STEP_DATA',
-        step: 1,
-        data: { datosRiesgo: { ...dr, ...patch } as typeof dr },
-      });
-
+      dispatch({ type: 'SET_STEP_DATA', step: 1, data: { datosRiesgo: { ...dr, ...patch } as typeof dr } });
       if (rawField === 'email') {
         validateField(`${role}_email`, value, validateEmail);
       }
@@ -129,161 +217,164 @@ export function DatosRiesgo(): React.JSX.Element {
   );
 
   const handleTomadorChange = useCallback(
-    (field: string, value: string) => updateField('tomador', field, value),
-    [updateField],
-  );
-
+    (field: string, value: string) => updateField('tomador', field, value), [updateField]);
   const handleAseguradoChange = useCallback(
-    (field: string, value: string) => updateField('asegurado', field, value),
-    [updateField],
-  );
+    (field: string, value: string) => updateField('asegurado', field, value), [updateField]);
 
   const handleSameToggle = useCallback(() => {
     const next = !isSameAsInsured;
     const newAsegurado = next
       ? { ...tomador, tipo: 'asegurado' as const }
       : { ...EMPTY_PERSON, tipo: 'asegurado' as const } as typeof asegurado;
-
     updateDatosRiesgo({ isSameAsInsured: next, asegurado: newAsegurado });
   }, [isSameAsInsured, tomador, asegurado, updateDatosRiesgo]);
 
-  const handlePlanChange = useCallback(
-    (plan: PlanVida) => updateDatosRiesgo({ plan }),
-    [updateDatosRiesgo],
-  );
-
-  const handleTipoPersonaChange = useCallback(
-    (tipo: TipoPersonaNatJur) => updateDatosRiesgo({ tipoPersonaNatJur: tipo }),
-    [updateDatosRiesgo],
-  );
-
+  const handlePlanChange = useCallback((plan: PlanVida) => updateDatosRiesgo({ plan }), [updateDatosRiesgo]);
+  const handleTipoPersonaChange = useCallback((tipo: TipoPersonaNatJur) => updateDatosRiesgo({ tipoPersonaNatJur: tipo }), [updateDatosRiesgo]);
   const handleRepresentanteChange = useCallback(
-    (data: Partial<RepresentanteLegal>) =>
-      updateDatosRiesgo({ representanteLegal: { ...dr.representanteLegal, ...data } }),
-    [dr.representanteLegal, updateDatosRiesgo],
-  );
-
-  /** Simula validación de clave de intermediario */
+    (data: Partial<RepresentanteLegal>) => updateDatosRiesgo({ representanteLegal: { ...dr.representanteLegal, ...data } }),
+    [dr.representanteLegal, updateDatosRiesgo]);
   const handleClaveIntermediarioChange = useCallback(
     (value: string) => {
       const nombre = MOCK_ADVISORS[value.toUpperCase()] ?? '';
       updateDatosRiesgo({ claveIntermediario: value, nombreAsesor: nombre });
-    },
-    [updateDatosRiesgo],
-  );
+    }, [updateDatosRiesgo]);
 
-  // Merge age error into errors for display
   const allErrors = { ...errors };
-  if (ageError && aseguradoDob) {
-    allErrors['asegurado_dateOfBirth'] = ageError;
-  }
+  if (ageError && aseguradoDob) allErrors['asegurado_dateOfBirth'] = ageError;
 
   return (
-    <div className="space-y-6">
-      {/* 1. Información del Asesor */}
-      <BentoCard>
-        <h2 className="mb-3 text-h5 font-semibold text-gray-800">Información del Asesor</h2>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <FormField
-            label="Clave del Intermediario"
-            name="claveIntermediario"
-            value={dr.claveIntermediario}
-            onChange={(e) => handleClaveIntermediarioChange(e.target.value)}
-            required
-            placeholder="Ej: AS-998877"
-          />
-          <FormField
-            label="Nombre del Asesor"
-            name="nombreAsesor"
-            value={dr.nombreAsesor}
-            onChange={() => {}}
-            disabled
-            placeholder="Se autocompleta al validar la clave"
-          />
-        </div>
-      </BentoCard>
-
-      {/* 2. Selección de Plan */}
-      <BentoCard>
-        <PlanSelector value={dr.plan} onChange={handlePlanChange} error={!dr.plan ? undefined : undefined} />
-      </BentoCard>
-
-      {/* Tipo Persona */}
-      <BentoCard>
-        <TipoPersonaToggle
-          value={dr.tipoPersonaNatJur}
-          onChange={handleTipoPersonaChange}
-          representanteLegal={dr.representanteLegal}
-          onRepresentanteChange={handleRepresentanteChange}
-        />
-      </BentoCard>
-
-      {/* 3. Datos del Tomador */}
-      <BentoCard>
-        <h2 className="mb-3 text-h5 font-semibold text-gray-800">Datos del Tomador</h2>
-        <PersonFields prefix="tomador" data={tomador} disabled={false}
-          errors={allErrors} onChange={handleTomadorChange} />
-      </BentoCard>
-
-      {/* Checkbox Tomador = Asegurado */}
-      <label className="flex items-center gap-2 text-sm text-gray-700">
-        <input type="checkbox" checked={isSameAsInsured} onChange={handleSameToggle}
-          className="h-4 w-4 rounded border-gray-300 accent-[#005931]" />
-        Tomador es el mismo Asegurado
-      </label>
-
-      {/* 4. Datos del Asegurado */}
-      <BentoCard>
-        <h2 className="mb-3 text-h5 font-semibold text-gray-800">Datos del Asegurado</h2>
-
-        {/* Campos de persona: se contraen si Tomador = Asegurado */}
-        {!isSameAsInsured && (
-          <PersonFields prefix="asegurado" data={asegurado} disabled={false}
-            errors={allErrors} onChange={handleAseguradoChange} />
+    <div className="space-y-4">
+      {/* Section 1: Asesor */}
+      <SectionHeader icon={User} title="Información del Asesor" subtitle="Clave del intermediario y validación"
+        stepNumber={1} isComplete={isSection1Complete} isOpen={openSections.has(1)}
+        onToggle={() => toggleSection(1)} isVisible />
+      <AnimatePresence>
+        {openSections.has(1) && (
+          <motion.div variants={sectionVariants} initial="hidden" animate="visible" exit="exit" className="overflow-hidden">
+            <div className="rounded-2xl bg-white border border-gray-100 shadow-xl p-6 md:p-8">
+              <div className="border-l-4 border-[#005931] pl-4 mb-6">
+                <h3 className="text-lg font-bold text-[#002B49]">Información del Asesor</h3>
+                <p className="text-gray-500 text-sm">Ingresa la clave del intermediario para continuar.</p>
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <FormField label="Clave del Intermediario" name="claveIntermediario" value={dr.claveIntermediario}
+                  onChange={(e) => handleClaveIntermediarioChange(e.target.value)} required placeholder="Ej: AS-998877" />
+                <FormField label="Nombre del Asesor" name="nombreAsesor" value={dr.nombreAsesor}
+                  onChange={() => {}} disabled placeholder="Se autocompleta al validar la clave" />
+              </div>
+            </div>
+          </motion.div>
         )}
+      </AnimatePresence>
 
-        {isSameAsInsured && (
-          <p className="text-sm text-gray-500 italic">
-            Los datos del tomador se usarán como datos del asegurado.
-          </p>
+      {/* Section 2: Plan + Tipo Persona */}
+      <SectionHeader icon={Shield} title="Selección de Plan" subtitle="Elige el producto y tipo de persona"
+        stepNumber={2} isComplete={isSection2Complete} isOpen={openSections.has(2)}
+        onToggle={() => toggleSection(2)} isVisible={isSection1Complete || openSections.has(2)} />
+      <AnimatePresence>
+        {openSections.has(2) && (isSection1Complete || isSection2Complete) && (
+          <motion.div variants={sectionVariants} initial="hidden" animate="visible" exit="exit" className="overflow-hidden">
+            <div className="rounded-2xl bg-white border border-gray-100 shadow-xl p-6 md:p-8 space-y-6">
+              <div className="border-l-4 border-[#005931] pl-4 mb-2">
+                <h3 className="text-lg font-bold text-[#002B49]">Plan y Tipo de Persona</h3>
+                <p className="text-gray-500 text-sm">Selecciona el plan de vida y el tipo de persona.</p>
+              </div>
+              <PlanSelector value={dr.plan} onChange={handlePlanChange} />
+              <TipoPersonaToggle value={dr.tipoPersonaNatJur} onChange={handleTipoPersonaChange}
+                representanteLegal={dr.representanteLegal} onRepresentanteChange={handleRepresentanteChange} />
+            </div>
+          </motion.div>
         )}
+      </AnimatePresence>
 
-        {age >= 0 && (
-          <p className={`mt-2 text-xs ${isAgeValid ? 'text-[#005931]' : 'text-red-600'}`}>
-            Edad del asegurado: {age} años {!isAgeValid && ageError ? `— ${ageError}` : ''}
-          </p>
+      {/* Section 3: Tomador */}
+      <SectionHeader icon={User} title="Datos del Tomador" subtitle="Información de quien contrata el seguro"
+        stepNumber={3} isComplete={isSection3Complete} isOpen={openSections.has(3)}
+        onToggle={() => toggleSection(3)} isVisible={isSection2Complete || openSections.has(3)} />
+      <AnimatePresence>
+        {openSections.has(3) && (isSection2Complete || isSection3Complete) && (
+          <motion.div variants={sectionVariants} initial="hidden" animate="visible" exit="exit" className="overflow-hidden">
+            <div className="rounded-2xl bg-white border border-gray-100 shadow-xl p-6 md:p-8">
+              <div className="border-l-4 border-[#005931] pl-4 mb-6">
+                <h3 className="text-lg font-bold text-[#002B49]">Datos del Tomador</h3>
+                <p className="text-gray-500 text-sm">Información personal de quien contrata el seguro.</p>
+              </div>
+              <PersonFields prefix="tomador" data={tomador} disabled={false} errors={allErrors} onChange={handleTomadorChange} />
+            </div>
+          </motion.div>
         )}
+      </AnimatePresence>
 
-        {/* Datos Financieros y Biográficos (integrados) */}
-        <div className="mt-4 border-t border-gray-100 pt-4">
-          <DatosFinancieros
-            ingresoMensual={dr.ingresoMensual}
-            onIngresoChange={(value) => updateDatosRiesgo({ ingresoMensual: value })}
-            ciudad={dr.ciudad}
-            onCiudadChange={(v) => updateDatosRiesgo({ ciudad: v })}
-            ocupacion={dr.ocupacion}
-            onOcupacionChange={(v) => updateDatosRiesgo({ ocupacion: v })}
-            actividadEconomica={dr.actividadEconomica}
-            onActividadChange={(v) => updateDatosRiesgo({ actividadEconomica: v })}
-            relacionLaboral={dr.relacionLaboral}
-            onRelacionLaboralChange={(v) => updateDatosRiesgo({ relacionLaboral: v })}
-          />
-        </div>
-      </BentoCard>
+      {/* Section 4: Asegurado */}
+      <SectionHeader icon={Shield} title="Datos del Asegurado" subtitle="Información de la persona asegurada"
+        stepNumber={4} isComplete={isSection4Complete} isOpen={openSections.has(4)}
+        onToggle={() => toggleSection(4)} isVisible={isSection3Complete || openSections.has(4)} />
+      <AnimatePresence>
+        {openSections.has(4) && (isSection3Complete || isSection4Complete) && (
+          <motion.div variants={sectionVariants} initial="hidden" animate="visible" exit="exit" className="overflow-hidden">
+            <div className="rounded-2xl bg-white border border-gray-100 shadow-xl p-6 md:p-8 space-y-4">
+              <div className="border-l-4 border-[#005931] pl-4 mb-4">
+                <h3 className="text-lg font-bold text-[#002B49]">Datos del Asegurado</h3>
+                <p className="text-gray-500 text-sm">Persona que será protegida por la póliza.</p>
+              </div>
 
-      {/* Checkbox de tratamiento de datos */}
-      <label className="flex items-start gap-2 text-sm text-gray-700">
-        <input
-          type="checkbox"
-          checked={dr.aceptaTratamientoDatos}
-          onChange={() => updateDatosRiesgo({ aceptaTratamientoDatos: !dr.aceptaTratamientoDatos })}
-          className="mt-0.5 h-4 w-4 rounded border-gray-300 accent-[#005931]"
-        />
-        <span>
-          Autorizo el tratamiento de mis datos personales de acuerdo con la política de
-          privacidad de Seguros Bolívar.
-        </span>
-      </label>
+              <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                <input type="checkbox" checked={isSameAsInsured} onChange={handleSameToggle}
+                  className="h-4 w-4 rounded border-gray-300 accent-[#005931]" />
+                Tomador es el mismo Asegurado
+              </label>
+
+              {!isSameAsInsured && (
+                <PersonFields prefix="asegurado" data={asegurado} disabled={false} errors={allErrors} onChange={handleAseguradoChange} />
+              )}
+              {isSameAsInsured && (
+                <p className="text-sm text-gray-500 italic">Los datos del tomador se usarán como datos del asegurado.</p>
+              )}
+              {age >= 0 && (
+                <p className={`text-xs ${isAgeValid ? 'text-[#005931]' : 'text-red-600'}`}>
+                  Edad del asegurado: {age} años {!isAgeValid && ageError ? `— ${ageError}` : ''}
+                </p>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Section 5: Datos Financieros + Consentimiento */}
+      <SectionHeader icon={Briefcase} title="Datos Financieros" subtitle="Información laboral y económica"
+        stepNumber={5} isComplete={!!dr.ciudad && !!dr.ocupacion} isOpen={openSections.has(5)}
+        onToggle={() => toggleSection(5)} isVisible={isSection4Complete || openSections.has(5)} />
+      <AnimatePresence>
+        {openSections.has(5) && isSection4Complete && (
+          <motion.div variants={sectionVariants} initial="hidden" animate="visible" exit="exit" className="overflow-hidden">
+            <div className="rounded-2xl bg-white border border-gray-100 shadow-xl p-6 md:p-8 space-y-6">
+              <div className="border-l-4 border-[#005931] pl-4 mb-2">
+                <h3 className="text-lg font-bold text-[#002B49]">Datos Financieros y Biográficos</h3>
+                <p className="text-gray-500 text-sm">Información laboral y económica del asegurado.</p>
+              </div>
+              <DatosFinancieros
+                ingresoMensual={dr.ingresoMensual}
+                onIngresoChange={(value) => updateDatosRiesgo({ ingresoMensual: value })}
+                ciudad={dr.ciudad} onCiudadChange={(v) => updateDatosRiesgo({ ciudad: v })}
+                ocupacion={dr.ocupacion} onOcupacionChange={(v) => updateDatosRiesgo({ ocupacion: v })}
+                actividadEconomica={dr.actividadEconomica} onActividadChange={(v) => updateDatosRiesgo({ actividadEconomica: v })}
+                relacionLaboral={dr.relacionLaboral} onRelacionLaboralChange={(v) => updateDatosRiesgo({ relacionLaboral: v })}
+              />
+
+              {/* Consentimiento */}
+              <div className="border-t border-gray-100 pt-4">
+                <label className="flex items-start gap-3 text-sm text-gray-700 cursor-pointer">
+                  <input type="checkbox" checked={dr.aceptaTratamientoDatos}
+                    onChange={() => updateDatosRiesgo({ aceptaTratamientoDatos: !dr.aceptaTratamientoDatos })}
+                    className="mt-0.5 h-4 w-4 rounded border-gray-300 accent-[#005931]" />
+                  <span>Autorizo el tratamiento de mis datos personales de acuerdo con la política de privacidad de Seguros Bolívar.</span>
+                </label>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
