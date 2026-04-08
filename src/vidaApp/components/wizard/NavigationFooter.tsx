@@ -1,6 +1,6 @@
 /**
  * Barra de acción fija (footer) con navegación del wizard.
- * Usa sb-ui-button del Design System Seguros Bolívar.
+ * Botones usan sb-ui-button del Design System Seguros Bolívar.
  * Ramo Vida Individual — Simón Ventas.
  */
 
@@ -36,11 +36,11 @@ export function NavigationFooter({
           onClick={onBack}
           disabled={isFirstStep}
           aria-disabled={isFirstStep}
-          className={`sb-ui-button sb-ui-button--secondary sb-ui-button--icon-left ${
+          className={`sb-ui-button sb-ui-button--secondary ${
             isFirstStep ? 'sb-ui-button--disabled' : ''
           }`}
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4 mr-1.5 inline" />
           Atrás
         </button>
 
@@ -52,11 +52,11 @@ export function NavigationFooter({
               onClick={onFinalize}
               disabled={!isStepValid}
               aria-disabled={!isStepValid}
-              className={`sb-ui-button sb-ui-button--primary sb-ui-button--icon-left ${
+              className={`sb-ui-button sb-ui-button--primary ${
                 !isStepValid ? 'sb-ui-button--disabled' : ''
               }`}
             >
-              <FileCheck className="h-4 w-4" />
+              <FileCheck className="h-4 w-4 mr-1.5 inline" />
               Finalizar Cotización
             </button>
           )}
@@ -67,11 +67,11 @@ export function NavigationFooter({
               onClick={onSubscribe}
               disabled={!isStepValid}
               aria-disabled={!isStepValid}
-              className={`sb-ui-button sb-ui-button--secondary sb-ui-button--fill sb-ui-button--icon-left ${
+              className={`sb-ui-button sb-ui-button--secondary sb-ui-button--fill ${
                 !isStepValid ? 'sb-ui-button--disabled' : ''
               }`}
             >
-              <ClipboardCheck className="h-4 w-4" />
+              <ClipboardCheck className="h-4 w-4 mr-1.5 inline" />
               Suscribir
             </button>
           ) : (
@@ -80,12 +80,12 @@ export function NavigationFooter({
               onClick={onNext}
               disabled={!isStepValid}
               aria-disabled={!isStepValid}
-              className={`sb-ui-button sb-ui-button--primary sb-ui-button--fill sb-ui-button--icon-right ${
+              className={`sb-ui-button sb-ui-button--primary sb-ui-button--fill ${
                 !isStepValid ? 'sb-ui-button--disabled' : ''
               }`}
             >
               Continuar
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 ml-1.5 inline" />
             </button>
           )}
         </div>

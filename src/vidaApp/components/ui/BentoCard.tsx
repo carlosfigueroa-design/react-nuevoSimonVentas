@@ -1,5 +1,5 @@
 /**
- * Contenedor card usando Design System Seguros Bolívar.
+ * Contenedor bv-card con fondo blanco, border-radius 12px y sombra sutil.
  * Ramo Vida Individual — Simón Ventas.
  */
 
@@ -10,10 +10,8 @@ export interface BentoCardProps {
 
 export function BentoCard({ children, className = '' }: BentoCardProps): React.JSX.Element {
   return (
-    <div className={`sb-ui-card sb-ui-card--outlined p-8 ${className}`}>
-      <div className="sb-ui-card__body">
-        {children}
-      </div>
+    <div className={`rounded-xl border border-gray-100 bg-white p-8 shadow-sm ${className}`}>
+      {children}
     </div>
   );
 }

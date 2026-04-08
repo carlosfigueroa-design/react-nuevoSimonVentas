@@ -1,6 +1,6 @@
 /**
  * Modal de envío de correo pre-llenado con email del Tomador.
- * Usa sb-ui-button, sb-ui-input, sb-ui-alert, sb-ui-card del DS.
+ * Botones usan sb-ui-button, inputs usan sb-ui-input del DS.
  * Ramo Vida Individual — Simón Ventas.
  */
 
@@ -86,13 +86,13 @@ export function EmailModal({
             role="dialog"
             aria-modal="true"
             aria-labelledby="email-modal-title"
-            className="sb-ui-card sb-ui-card--elevated relative z-10 mx-4 w-full max-w-md p-6"
+            className="relative z-10 mx-4 w-full max-w-md rounded-xl bg-white p-6 shadow-xl"
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
           >
             <div className="flex items-center justify-between">
-              <h2 id="email-modal-title" className="sb-ui-heading-h6 font-semibold text-gray-900">
+              <h2 id="email-modal-title" className="text-h6 font-semibold text-gray-900">
                 Enviar Cotización
               </h2>
               <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600">
@@ -103,8 +103,8 @@ export function EmailModal({
             {status === 'success' ? (
               <div className="mt-6 flex flex-col items-center gap-3 py-4 text-center">
                 <CheckCircle className="h-10 w-10 text-[#00C875]" />
-                <p className="sb-ui-text-body font-medium text-gray-900">Cotización enviada exitosamente</p>
-                <p className="sb-ui-text-caption text-gray-500">Se envió a {email}</p>
+                <p className="text-sm font-medium text-gray-900">Cotización enviada exitosamente</p>
+                <p className="text-xs text-gray-500">Se envió a {email}</p>
                 <button
                   type="button"
                   onClick={onClose}
@@ -116,11 +116,11 @@ export function EmailModal({
             ) : (
               <>
                 <div className="mt-4 space-y-3">
-                  <p className="sb-ui-text-body text-gray-600">
+                  <p className="text-sm text-gray-600">
                     Cotización <span className="font-medium">{quoteNumber}</span>
                   </p>
-                  <div className="sb-ui-input-container">
-                    <label htmlFor="email-input" className="sb-ui-input-label">
+                  <div className="flex flex-col gap-1">
+                    <label htmlFor="email-input" className="text-sm font-medium text-gray-700">
                       Correo electrónico
                     </label>
                     <input
@@ -128,13 +128,13 @@ export function EmailModal({
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="sb-ui-input"
+                      className="sb-ui-input w-full"
                     />
                   </div>
 
                   {status === 'error' && (
                     <div className="sb-ui-alert sb-ui-alert--error sb-ui-alert--small">
-                      <AlertCircle className="sb-ui-alert__icon h-4 w-4" />
+                      <AlertCircle className="sb-ui-alert__icon h-4 w-4 shrink-0" />
                       <span className="sb-ui-alert__message">Error al enviar. Intente nuevamente.</span>
                     </div>
                   )}
@@ -152,14 +152,14 @@ export function EmailModal({
                     type="button"
                     onClick={handleSend}
                     disabled={!email.trim() || status === 'sending'}
-                    className={`sb-ui-button sb-ui-button--primary sb-ui-button--fill sb-ui-button--icon-left ${
+                    className={`sb-ui-button sb-ui-button--primary sb-ui-button--fill ${
                       (!email.trim() || status === 'sending') ? 'sb-ui-button--disabled' : ''
                     }`}
                   >
                     {status === 'error' ? (
-                      <><RefreshCw className="h-4 w-4" /> Reintentar</>
+                      <><RefreshCw className="h-4 w-4 mr-1.5 inline" /> Reintentar</>
                     ) : (
-                      <><Send className="h-4 w-4" /> {status === 'sending' ? 'Enviando...' : 'Enviar'}</>
+                      <><Send className="h-4 w-4 mr-1.5 inline" /> {status === 'sending' ? 'Enviando...' : 'Enviar'}</>
                     )}
                   </button>
                 </div>

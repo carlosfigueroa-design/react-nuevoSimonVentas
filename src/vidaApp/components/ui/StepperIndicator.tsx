@@ -1,6 +1,6 @@
 /**
- * Indicador visual de pasos del wizard.
- * Usa sb-ui-stepper del Design System Seguros Bolívar.
+ * Indicador visual de pasos del wizard — Estilo RELUX Seguros Bolívar.
+ * Iconos circulares grandes con línea conectora, "Paso N" y nombre debajo.
  * Ramo Vida Individual — Simón Ventas.
  */
 
@@ -36,7 +36,7 @@ export function StepperIndicator({
   const completed = completedSteps instanceof Set ? completedSteps : new Set(completedSteps);
 
   return (
-    <nav aria-label="Progreso del wizard" className="sb-ui-stepper sb-ui-stepper--horizontal w-full py-4">
+    <nav aria-label="Progreso del wizard" className="w-full py-4">
       <ol className="flex items-start justify-between">
         {WIZARD_STEPS.map((step, idx) => {
           const isCompleted = completed.has(step);
@@ -44,19 +44,13 @@ export function StepperIndicator({
           const isLast = idx === WIZARD_STEPS.length - 1;
           const Icon = STEP_ICONS[step];
 
-          const stepClass = isCompleted
-            ? 'sb-ui-stepper__step sb-ui-stepper__step--filled-default'
-            : isCurrent
-              ? 'sb-ui-stepper__step sb-ui-stepper__step--filled-active'
-              : 'sb-ui-stepper__step sb-ui-stepper__step--empty-active';
-
           return (
             <li key={step} className="flex flex-1 items-start">
               {/* Step circle + labels */}
-              <div className={`${stepClass} flex flex-col items-center gap-1.5 min-w-[80px]`}>
+              <div className="flex flex-col items-center gap-1.5 min-w-[80px]">
                 {/* Circle icon */}
                 <div
-                  className={`sb-ui-stepper__step-circle flex h-12 w-12 items-center justify-center rounded-full transition-colors ${
+                  className={`flex h-12 w-12 items-center justify-center rounded-full transition-colors ${
                     isCompleted
                       ? 'bg-[#005931] text-white shadow-md'
                       : isCurrent
@@ -75,7 +69,7 @@ export function StepperIndicator({
 
                 {/* "Paso N" label */}
                 <span
-                  className={`sb-ui-text-caption font-medium tracking-wide ${
+                  className={`text-[10px] font-medium tracking-wide ${
                     isCurrent || isCompleted ? 'text-[#005931]' : 'text-gray-400'
                   }`}
                 >
@@ -83,14 +77,18 @@ export function StepperIndicator({
                 </span>
 
                 {/* Step name */}
-                <span className="sb-ui-stepper__step-label text-center">
+                <span
+                  className={`text-center text-[9px] font-semibold uppercase leading-tight tracking-wider ${
+                    isCurrent ? 'text-[#005931]' : isCompleted ? 'text-[#005931]/70' : 'text-gray-400'
+                  }`}
+                >
                   {STEP_NAMES[step]}
                 </span>
               </div>
 
               {/* Connector line */}
               {!isLast && (
-                <div className="sb-ui-stepper__step-track relative mt-6 flex-1 mx-2">
+                <div className="relative mt-6 flex-1 mx-2">
                   <div className="h-0.5 w-full bg-gray-200" aria-hidden />
                   {isCompleted && (
                     <div className="absolute inset-0 h-0.5 bg-[#005931]" aria-hidden />

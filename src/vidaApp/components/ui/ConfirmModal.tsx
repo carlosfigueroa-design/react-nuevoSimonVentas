@@ -2,7 +2,7 @@
  * Modal de confirmación con animación Framer Motion.
  * Soporta variante de advertencia (extraprima).
  * Se renderiza como portal en document.body.
- * Usa clases sb-ui-button del Design System Seguros Bolívar.
+ * Botones usan sb-ui-button del Design System Seguros Bolívar.
  * Ramo Vida Individual — Simón Ventas.
  */
 
@@ -80,7 +80,7 @@ export function ConfirmModal({
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-title"
-            className={`sb-ui-card sb-ui-card--elevated relative z-10 mx-4 w-full max-w-md p-6 ${
+            className={`relative z-10 mx-4 w-full max-w-md rounded-xl bg-white p-6 shadow-xl ${
               isWarning ? 'border-2 border-[#FFD100]' : ''
             }`}
             initial={{ scale: 0.9, opacity: 0 }}
@@ -95,10 +95,10 @@ export function ConfirmModal({
                 </div>
               )}
               <div>
-                <h2 id="modal-title" className="sb-ui-heading-h6 font-semibold text-gray-900">
+                <h2 id="modal-title" className="text-h6 font-semibold text-gray-900">
                   {title}
                 </h2>
-                <p className="mt-2 sb-ui-text-body text-gray-600">{message}</p>
+                <p className="mt-2 text-sm text-gray-600">{message}</p>
               </div>
             </div>
 

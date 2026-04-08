@@ -15,9 +15,9 @@ export interface PlanSelectorProps {
 
 export function PlanSelector({ value, onChange, error }: PlanSelectorProps): React.JSX.Element {
   return (
-    <div className="sb-ui-select-container">
-      <label htmlFor="plan-selector" className="sb-ui-select-label sb-ui-select-label--required">
-        Plan de Vida
+    <div className="flex flex-col gap-1">
+      <label htmlFor="plan-selector" className="text-sm font-medium text-gray-700">
+        Plan de Vida <span className="text-red-500">*</span>
       </label>
       <select
         id="plan-selector"
@@ -25,7 +25,7 @@ export function PlanSelector({ value, onChange, error }: PlanSelectorProps): Rea
         onChange={(e) => onChange(e.target.value as PlanVida)}
         aria-invalid={!!error}
         aria-describedby={error ? 'plan-selector-error' : undefined}
-        className={`sb-ui-select ${error ? 'sb-ui-select--error' : ''}`}
+        className={`sb-ui-select w-full ${error ? 'sb-ui-select--error' : ''}`}
       >
         <option value="">Seleccione un plan...</option>
         {PLAN_OPTIONS.map((opt) => (
@@ -35,7 +35,7 @@ export function PlanSelector({ value, onChange, error }: PlanSelectorProps): Rea
         ))}
       </select>
       {error && (
-        <p id="plan-selector-error" className="sb-ui-select-helper sb-ui-select-helper--error" role="alert">
+        <p id="plan-selector-error" className="text-xs text-red-600" role="alert">
           {error}
         </p>
       )}

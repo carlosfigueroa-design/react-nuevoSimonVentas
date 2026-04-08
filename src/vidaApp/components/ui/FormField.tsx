@@ -1,7 +1,7 @@
 /**
  * Campo de formulario reutilizable con label, input, validación y estado de error.
  * Soporta máscara de moneda colombiana.
- * Usa clases sb-ui-input y sb-ui-select del Design System Seguros Bolívar.
+ * Inputs usan sb-ui-input / sb-ui-select del Design System Seguros Bolívar.
  * Ramo Vida Individual — Simón Ventas.
  */
 
@@ -39,13 +39,13 @@ export function FormField({
   const errorId = `${inputId}-error`;
 
   const inputClasses = [
-    'sb-ui-input',
+    'sb-ui-input w-full',
     error ? 'sb-ui-input--error' : '',
     disabled ? 'sb-ui-input--disabled' : '',
   ].filter(Boolean).join(' ');
 
   const selectClasses = [
-    'sb-ui-select',
+    'sb-ui-select w-full',
     error ? 'sb-ui-select--error' : '',
     disabled ? 'sb-ui-select--disabled' : '',
   ].filter(Boolean).join(' ');
@@ -65,34 +65,33 @@ export function FormField({
   };
 
   return (
-    <div className="sb-ui-input-container">
-      <label htmlFor={inputId} className={`sb-ui-input-label ${required ? 'sb-ui-input-label--required' : ''}`}>
+    <div className="flex flex-col gap-1">
+      <label htmlFor={inputId} className="text-sm font-medium text-gray-700">
         {label}
+        {required && <span className="ml-0.5 text-red-500">*</span>}
       </label>
 
       {options ? (
-        <div className="sb-ui-select-container">
-          <select
-            id={inputId}
-            name={name}
-            value={value}
-            onChange={onChange}
-            disabled={disabled}
-            aria-invalid={!!error}
-            aria-describedby={error ? errorId : undefined}
-            className={selectClasses}
-          >
-            <option value="">{placeholder ?? 'Seleccione...'}</option>
-            {options.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </div>
+        <select
+          id={inputId}
+          name={name}
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          aria-invalid={!!error}
+          aria-describedby={error ? errorId : undefined}
+          className={selectClasses}
+        >
+          <option value="">{placeholder ?? 'Seleccione...'}</option>
+          {options.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
       ) : mask === 'currency' ? (
-        <div className="sb-ui-input-inner">
-          <span className="sb-ui-input-icon" style={{ pointerEvents: 'none' }}>$</span>
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">$</span>
           <input
             id={inputId}
             name={name}
@@ -108,7 +107,7 @@ export function FormField({
             placeholder={placeholder ?? '0'}
             aria-invalid={!!error}
             aria-describedby={error ? errorId : undefined}
-            className={`${inputClasses} sb-ui-input--with-icon`}
+            className={`${inputClasses} pl-7`}
           />
         </div>
       ) : (
@@ -127,7 +126,7 @@ export function FormField({
       )}
 
       {error && (
-        <p id={errorId} className="sb-ui-input-helper sb-ui-select-helper--error" role="alert">
+        <p id={errorId} className="text-xs text-red-600" role="alert">
           {error}
         </p>
       )}
