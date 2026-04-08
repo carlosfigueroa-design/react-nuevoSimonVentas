@@ -12,6 +12,9 @@ coverage/
 .env*
 !.env.example
 
+# NPM auth tokens
+.npmrc
+
 # OS files
 .DS_Store
 Thumbs.db
