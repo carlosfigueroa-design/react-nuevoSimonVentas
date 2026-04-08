@@ -65,10 +65,10 @@ export function HealthAccordion({
             </button>
 
             {isOpen && (
-              <div className="space-y-3 px-4 pb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 px-4 pb-4">
                 {cat.questions.map((q) => (
-                  <div key={q.id} className="flex flex-col gap-1.5">
-                    <span className="text-xs text-gray-700">
+                  <div key={q.id} className="flex items-center justify-between gap-3 py-2 border-b border-gray-50 last:border-0">
+                    <span className="text-xs text-gray-700 flex-1">
                       {q.text}
                       {q.required && <span className="ml-0.5 text-red-500">*</span>}
                     </span>
@@ -88,7 +88,7 @@ export function HealthAccordion({
                         value={answers[q.id] !== undefined ? String(answers[q.id]) : ''}
                         onChange={(e) => onAnswerChange(q.id, Number(e.target.value))}
                         disabled={disabled}
-                        className={`sb-ui-input sb-ui-input--small w-full ${disabled ? 'sb-ui-input--disabled' : ''}`}
+                        className={`sb-ui-input sb-ui-input--small w-24 ${disabled ? 'sb-ui-input--disabled' : ''}`}
                       />
                     ) : (
                       <textarea

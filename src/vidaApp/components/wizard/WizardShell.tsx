@@ -103,8 +103,6 @@ function WizardContent(): React.JSX.Element {
           isStepValid={stepValid}
           onBack={goToPreviousStep}
           onNext={goToNextStep}
-          onFinalize={currentStep === 2 ? handleFinalize : undefined}
-          onSubscribe={currentStep === 2 ? handleSubscribe : undefined}
         />
       </div>
     </div>

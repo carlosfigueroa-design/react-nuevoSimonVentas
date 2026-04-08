@@ -153,10 +153,10 @@ export function Declaracion(): React.JSX.Element {
         </div>
       )}
 
-      {/* IMC */}
+      {/* IMC + Cuestionario en layout compacto */}
       <BentoCard>
         <h2 className="mb-3 text-h5 font-semibold text-gray-800">Índice de Masa Corporal</h2>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-3 gap-4">
           <div className="flex flex-col gap-1">
             <label htmlFor="weight" className="text-sm font-medium text-gray-700">
               Peso (kg) <span className="text-red-500">*</span>
@@ -169,7 +169,7 @@ export function Declaracion(): React.JSX.Element {
               value={weight || ''}
               onChange={handleWeightChange}
               disabled={decl.isConfirmed}
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#005931] focus:outline-none focus:ring-2 focus:ring-[#005931]/15 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="sb-ui-input w-full"
               placeholder="Ej: 70"
             />
           </div>
@@ -185,7 +185,7 @@ export function Declaracion(): React.JSX.Element {
               value={height || ''}
               onChange={handleHeightChange}
               disabled={decl.isConfirmed}
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#005931] focus:outline-none focus:ring-2 focus:ring-[#005931]/15 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="sb-ui-input w-full"
               placeholder="Ej: 170"
             />
           </div>
