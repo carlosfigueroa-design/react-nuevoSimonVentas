@@ -35,7 +35,7 @@ const EMPTY_PERSON: PersonData = {
 };
 
 const MOCK_ADVISORS: Record<string, string> = {
-  'AS-998877': 'Carlos Andrés Martínez',
+  'AS-998877': 'Carlos Alberto Figueroa Martínez',
   'AS-112233': 'María Fernanda López',
   'AS-445566': 'Juan Pablo Rodríguez',
 };
