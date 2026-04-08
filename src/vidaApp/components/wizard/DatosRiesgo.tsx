@@ -385,28 +385,56 @@ export function DatosRiesgo(): React.JSX.Element {
       </AnimatePresence>
 
       {/* Section 4: Asegurado */}
-      <SectionHeader icon={Shield} title="Datos del Asegurado" subtitle="Persona que será protegida por la póliza"
+      <SectionHeader icon={Shield} title="Datos del Asegurado" subtitle="¿Quién será la persona protegida por esta póliza?"
         isComplete={isSection4Complete} isOpen={openSections.has(4)}
         onToggle={() => toggleSection(4)} isVisible={isSection3Complete || openSections.has(4)} />
       <AnimatePresence>
         {openSections.has(4) && (isSection3Complete || isSection4Complete) && (
           <motion.div variants={sectionVariants} initial="hidden" animate="visible" exit="exit" className="overflow-hidden">
-            <div className="rounded-2xl bg-white border border-gray-100 shadow-xl p-6 md:p-8 space-y-4">
-              <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                <input type="checkbox" checked={isSameAsInsured} onChange={handleSameToggle}
-                  className="h-4 w-4 rounded border-gray-300 accent-[#005931]" />
-                Tomador es el mismo Asegurado
-              </label>
+            <div className="rounded-2xl bg-white border border-gray-100 shadow-xl p-6 md:p-8 space-y-5">
 
+              {/* Toggle estilo Autos */}
+              <div className="flex items-center justify-between rounded-xl bg-gray-50 border border-gray-200 px-5 py-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#005931]/10">
+                    <User size={20} className="text-[#005931]" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-[#002B49]">¿Es el mismo tomador?</p>
+                    <p className="text-xs text-gray-400">Marca esta opción si el tomador es el mismo asegurado.</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={isSameAsInsured}
+                  onClick={handleSameToggle}
+                  className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors cursor-pointer ${
+                    isSameAsInsured ? 'bg-[#005931]' : 'bg-gray-300'
+                  }`}
+                >
+                  <span className={`inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                    isSameAsInsured ? 'translate-x-6' : 'translate-x-1'
+                  }`} />
+                </button>
+              </div>
+
+              {/* Si es el mismo: muestra datos del tomador en resumen */}
+              {isSameAsInsured && tomador.nombres && (
+                <div className="flex items-center gap-2 text-xs text-[#005931]">
+                  <CheckCircle size={14} />
+                  <span>Asegurado: <strong>{tomador.nombres} {tomador.apellidos}</strong> — {tomador.documentType} {tomador.documentNumber}</span>
+                </div>
+              )}
+
+              {/* Si NO es el mismo: formulario de asegurado */}
               {!isSameAsInsured && (
                 <PersonFields prefix="asegurado" data={asegurado} disabled={false} errors={allErrors} onChange={handleAseguradoChange}
                   onAutoPopulate={(person) => {
                     updateDatosRiesgo({ asegurado: { ...person, tipo: 'asegurado' } as typeof asegurado });
                   }} />
               )}
-              {isSameAsInsured && (
-                <p className="text-sm text-gray-500 italic">Los datos del tomador se usarán como datos del asegurado.</p>
-              )}
+
               {age >= 0 && (
                 <p className={`text-xs ${isAgeValid ? 'text-[#005931]' : 'text-red-600'}`}>
                   Edad del asegurado: {age} años {!isAgeValid && ageError ? `— ${ageError}` : ''}
