@@ -44,8 +44,8 @@ export function Coberturas(): React.JSX.Element {
     cob.periodicidad,
   );
 
-  const [basicOpen, setBasicOpen] = useState(true);
-  const [annexOpen, setAnnexOpen] = useState(true);
+  const [basicOpen, setBasicOpen] = useState(false);
+  const [annexOpen, setAnnexOpen] = useState(false);
   const [savingsOpen, setSavingsOpen] = useState(false);
 
   // Valor asegurado del amparo básico
