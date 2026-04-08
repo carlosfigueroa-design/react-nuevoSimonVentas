@@ -252,11 +252,11 @@ export function DatosRiesgo(): React.JSX.Element {
             <div className="rounded-2xl bg-white border border-gray-100 shadow-xl p-6 md:p-8">
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <FormField label="Clave del Intermediario" name="claveIntermediario" value={dr.claveIntermediario}
-                  onChange={(e) => handleClaveIntermediarioChange(e.target.value)} required placeholder="Ej: AS-998877" />
+                  onChange={(e) => handleClaveIntermediarioChange(e.target.value)} required placeholder="Escribe tu clave. Ej: AS-998877" />
                 <FormField label="Nombre del Asesor" name="nombreAsesor" value={dr.nombreAsesor}
                   onChange={() => {}} disabled placeholder="Se autocompleta al validar la clave" />
               </div>
-              {dr.claveIntermediario && !dr.nombreAsesor && (
+              {dr.claveIntermediario.length >= 4 && !dr.nombreAsesor && (
                 <p className="mt-3 text-xs text-yellow-600">Clave no encontrada. Verifica e intenta de nuevo.</p>
               )}
               {dr.nombreAsesor && (
