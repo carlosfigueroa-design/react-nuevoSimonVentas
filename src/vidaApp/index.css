@@ -1,0 +1,58 @@
+/* ============================================
+   Tipografía Corporativa — Seguros Bolívar
+   Escala: Heading / Desktop - Tablet
+   ============================================ */
+
+:root {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 16px; /* base = 1rem */
+  line-height: 1.5;
+  color: #1f2937;
+}
+
+/* --- Headings --- */
+h1, .text-h1       { font-size: 2.25rem; /* 36pt */ line-height: auto; }
+h1.bold             { font-weight: 700; }
+h1.semibold         { font-weight: 600; }
+h1.regular          { font-weight: 400; }
+
+h2, .text-h2       { font-size: 2rem;    /* 32pt */ line-height: auto; }
+h2.bold             { font-weight: 700; }
+h2.semibold         { font-weight: 600; }
+h2.regular          { font-weight: 400; }
+
+h3, .text-h3       { font-size: 1.75rem; /* 28pt */ line-height: auto; }
+h3.bold             { font-weight: 700; }
+h3.semibold         { font-weight: 600; }
+h3.regular          { font-weight: 400; }
+
+h4, .text-h4       { font-size: 1.5rem;  /* 24pt */ line-height: auto; }
+h4.bold             { font-weight: 700; }
+h4.semibold         { font-weight: 600; }
+h4.regular          { font-weight: 400; }
+
+h5, .text-h5       { font-size: 1.25rem; /* 20pt */ line-height: auto; }
+h5.bold             { font-weight: 700; }
+h5.semibold         { font-weight: 600; }
+h5.regular          { font-weight: 400; }
+
+h6, .text-h6       { font-size: 1rem;    /* 16pt */ line-height: auto; }
+h6.bold             { font-weight: 700; }
+h6.semibold         { font-weight: 600; }
+h6.regular          { font-weight: 400; }
+
+/* --- Utility classes --- */
+.text-label         { font-size: 0.6875rem; /* 11px */ }
+.text-body          { font-size: 0.875rem;  /* 14px */ }
+.text-title         { font-size: 1.5rem;    /* 24pt = H4 */ }
+
+/* --- Panel Central del Wizard --- */
+.wizard-panel {
+  width: 100%;
+  max-width: 1024px;
+  min-height: 600px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}

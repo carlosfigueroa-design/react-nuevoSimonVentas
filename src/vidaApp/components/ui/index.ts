@@ -1,0 +1,28 @@
+// UI components barrel file
+export { FormField } from './FormField';
+export type { FormFieldProps } from './FormField';
+export { CoverageCard } from './CoverageCard';
+export type { CoverageCardProps } from './CoverageCard';
+export { ConfirmModal } from './ConfirmModal';
+export type { ConfirmModalProps } from './ConfirmModal';
+export { ProjectionChart } from './ProjectionChart';
+export type { ProjectionChartProps } from './ProjectionChart';
+export { StepperIndicator } from './StepperIndicator';
+export type { StepperIndicatorProps } from './StepperIndicator';
+export { HealthAccordion } from './HealthAccordion';
+export type { HealthAccordionProps } from './HealthAccordion';
+export { BentoCard } from './BentoCard';
+export type { BentoCardProps } from './BentoCard';
+export { QuickActionCard } from './QuickActionCard';
+export type { QuickActionCardProps } from './QuickActionCard';
+export { QuoteSessionHeader } from './QuoteSessionHeader';
+export type { QuoteSessionHeaderProps } from './QuoteSessionHeader';
+export { AsistenciasGratuitas } from './AsistenciasGratuitas';
+export { SubCoberturas } from './SubCoberturas';
+export type { SubCoberturasProps } from './SubCoberturas';
+export { PriceHero } from './PriceHero';
+export type { PriceHeroProps } from './PriceHero';
+export { PDFPreviewModal } from './PDFPreviewModal';
+export type { PDFPreviewModalProps } from './PDFPreviewModal';
+export { EmailModal } from './EmailModal';
+export type { EmailModalProps } from './EmailModal';
