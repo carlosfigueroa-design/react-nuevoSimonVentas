@@ -1,0 +1,106 @@
+/**
+ * Indicador visual de pasos del wizard — Estilo RELUX Seguros Bolívar.
+ * Iconos circulares grandes con línea conectora, "Paso N" y nombre debajo.
+ * Ramo Vida Individual — Simón Ventas.
+ */
+
+import { Check, User, Shield, FileText, ClipboardList, FileCheck } from 'lucide-react';
+import type { WizardStep } from '../../types';
+import { WIZARD_STEPS } from '../../types';
+
+/** Iconos por paso */
+const STEP_ICONS: Record<WizardStep, React.FC<{ className?: string }>> = {
+  1: User,
+  2: Shield,
+  3: FileText,
+  4: ClipboardList,
+};
+
+/** Labels cortos por paso */
+const STEP_NAMES: Record<WizardStep, string> = {
+  1: 'DATOS DEL TOMADOR',
+  2: 'COBERTURAS',
+  3: 'DECLARACIÓN',
+  4: 'RESUMEN',
+};
+
+export interface StepperIndicatorProps {
+  currentStep: WizardStep;
+  completedSteps: Set<WizardStep> | WizardStep[];
+}
+
+export function StepperIndicator({
+  currentStep,
+  completedSteps,
+}: StepperIndicatorProps): React.JSX.Element {
+  const completed = completedSteps instanceof Set ? completedSteps : new Set(completedSteps);
+
+  return (
+    <nav aria-label="Progreso del wizard" className="w-full py-4">
+      <ol className="flex items-start justify-between">
+        {WIZARD_STEPS.map((step, idx) => {
+          const isCompleted = completed.has(step);
+          const isCurrent = step === currentStep;
+          const isLast = idx === WIZARD_STEPS.length - 1;
+          const Icon = STEP_ICONS[step];
+
+          return (
+            <li key={step} className="flex flex-1 items-start">
+              {/* Step circle + labels */}
+              <div className="flex flex-col items-center gap-1.5 min-w-[80px]">
+                {/* Circle icon */}
+                <div
+                  className={`flex h-12 w-12 items-center justify-center rounded-full transition-colors ${
+                    isCompleted
+                      ? 'bg-[#005931] text-white shadow-md'
+                      : isCurrent
+                        ? 'bg-[#005931] text-white shadow-lg ring-4 ring-[#005931]/20'
+                        : 'border-2 border-gray-300 bg-white text-gray-400'
+                  }`}
+                  aria-current={isCurrent ? 'step' : undefined}
+                  aria-label={`Paso ${step}: ${STEP_NAMES[step]}${isCompleted ? ' (completado)' : isCurrent ? ' (actual)' : ''}`}
+                >
+                  {isCompleted ? (
+                    <Check className="h-5 w-5" aria-hidden />
+                  ) : (
+                    <Icon className="h-5 w-5" aria-hidden />
+                  )}
+                </div>
+
+                {/* "Paso N" label */}
+                <span
+                  className={`text-[10px] font-medium tracking-wide ${
+                    isCurrent || isCompleted ? 'text-[#005931]' : 'text-gray-400'
+                  }`}
+                >
+                  Paso {step}
+                </span>
+
+                {/* Step name */}
+                <span
+                  className={`text-center text-[9px] font-semibold uppercase leading-tight tracking-wider ${
+                    isCurrent ? 'text-[#005931]' : isCompleted ? 'text-[#005931]/70' : 'text-gray-400'
+                  }`}
+                >
+                  {STEP_NAMES[step]}
+                </span>
+              </div>
+
+              {/* Connector line */}
+              {!isLast && (
+                <div className="relative mt-6 flex-1 mx-2">
+                  {/* Background line */}
+                  <div className="h-0.5 w-full bg-gray-200" aria-hidden />
+                  {/* Progress line */}
+                  {isCompleted && (
+                    <div className="absolute inset-0 h-0.5 bg-[#005931]" aria-hidden />
+                  )}
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
+  );
+}
