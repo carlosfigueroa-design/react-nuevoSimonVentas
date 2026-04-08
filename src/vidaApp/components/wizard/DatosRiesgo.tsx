@@ -52,7 +52,6 @@ function SectionHeader({
   icon: Icon,
   title,
   subtitle,
-  stepNumber,
   isComplete,
   isOpen,
   onToggle,
@@ -61,7 +60,6 @@ function SectionHeader({
   icon: React.FC<{ className?: string; size?: number }>;
   title: string;
   subtitle: string;
-  stepNumber: number;
   isComplete: boolean;
   isOpen: boolean;
   onToggle: () => void;
@@ -87,7 +85,6 @@ function SectionHeader({
               {isComplete ? <CheckCircle size={20} /> : <Icon size={20} />}
             </div>
             <div className="text-left">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Sección {stepNumber}</p>
               <h3 className="text-sm font-bold text-[#002B49]">{title}</h3>
               <p className="text-xs text-gray-400">{subtitle}</p>
             </div>
@@ -247,22 +244,27 @@ export function DatosRiesgo(): React.JSX.Element {
     <div className="space-y-4">
       {/* Section 1: Asesor */}
       <SectionHeader icon={User} title="Información del Asesor" subtitle="Clave del intermediario y validación"
-        stepNumber={1} isComplete={isSection1Complete} isOpen={openSections.has(1)}
+        isComplete={isSection1Complete} isOpen={openSections.has(1)}
         onToggle={() => toggleSection(1)} isVisible />
       <AnimatePresence>
         {openSections.has(1) && (
           <motion.div variants={sectionVariants} initial="hidden" animate="visible" exit="exit" className="overflow-hidden">
             <div className="rounded-2xl bg-white border border-gray-100 shadow-xl p-6 md:p-8">
-              <div className="border-l-4 border-[#005931] pl-4 mb-6">
-                <h3 className="text-lg font-bold text-[#002B49]">Información del Asesor</h3>
-                <p className="text-gray-500 text-sm">Ingresa la clave del intermediario para continuar.</p>
-              </div>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <FormField label="Clave del Intermediario" name="claveIntermediario" value={dr.claveIntermediario}
                   onChange={(e) => handleClaveIntermediarioChange(e.target.value)} required placeholder="Ej: AS-998877" />
                 <FormField label="Nombre del Asesor" name="nombreAsesor" value={dr.nombreAsesor}
                   onChange={() => {}} disabled placeholder="Se autocompleta al validar la clave" />
               </div>
+              {dr.claveIntermediario && !dr.nombreAsesor && (
+                <p className="mt-3 text-xs text-yellow-600">Clave no encontrada. Verifica e intenta de nuevo.</p>
+              )}
+              {dr.nombreAsesor && (
+                <div className="mt-3 flex items-center gap-2 text-xs text-[#005931]">
+                  <CheckCircle size={14} />
+                  <span>Asesor validado: <strong>{dr.nombreAsesor}</strong></span>
+                </div>
+              )}
             </div>
           </motion.div>
         )}
@@ -270,16 +272,12 @@ export function DatosRiesgo(): React.JSX.Element {
 
       {/* Section 2: Plan + Tipo Persona */}
       <SectionHeader icon={Shield} title="Selección de Plan" subtitle="Elige el producto y tipo de persona"
-        stepNumber={2} isComplete={isSection2Complete} isOpen={openSections.has(2)}
+        isComplete={isSection2Complete} isOpen={openSections.has(2)}
         onToggle={() => toggleSection(2)} isVisible={isSection1Complete || openSections.has(2)} />
       <AnimatePresence>
         {openSections.has(2) && (isSection1Complete || isSection2Complete) && (
           <motion.div variants={sectionVariants} initial="hidden" animate="visible" exit="exit" className="overflow-hidden">
             <div className="rounded-2xl bg-white border border-gray-100 shadow-xl p-6 md:p-8 space-y-6">
-              <div className="border-l-4 border-[#005931] pl-4 mb-2">
-                <h3 className="text-lg font-bold text-[#002B49]">Plan y Tipo de Persona</h3>
-                <p className="text-gray-500 text-sm">Selecciona el plan de vida y el tipo de persona.</p>
-              </div>
               <PlanSelector value={dr.plan} onChange={handlePlanChange} />
               <TipoPersonaToggle value={dr.tipoPersonaNatJur} onChange={handleTipoPersonaChange}
                 representanteLegal={dr.representanteLegal} onRepresentanteChange={handleRepresentanteChange} />
@@ -290,16 +288,12 @@ export function DatosRiesgo(): React.JSX.Element {
 
       {/* Section 3: Tomador */}
       <SectionHeader icon={User} title="Datos del Tomador" subtitle="Información de quien contrata el seguro"
-        stepNumber={3} isComplete={isSection3Complete} isOpen={openSections.has(3)}
+        isComplete={isSection3Complete} isOpen={openSections.has(3)}
         onToggle={() => toggleSection(3)} isVisible={isSection2Complete || openSections.has(3)} />
       <AnimatePresence>
         {openSections.has(3) && (isSection2Complete || isSection3Complete) && (
           <motion.div variants={sectionVariants} initial="hidden" animate="visible" exit="exit" className="overflow-hidden">
             <div className="rounded-2xl bg-white border border-gray-100 shadow-xl p-6 md:p-8">
-              <div className="border-l-4 border-[#005931] pl-4 mb-6">
-                <h3 className="text-lg font-bold text-[#002B49]">Datos del Tomador</h3>
-                <p className="text-gray-500 text-sm">Información personal de quien contrata el seguro.</p>
-              </div>
               <PersonFields prefix="tomador" data={tomador} disabled={false} errors={allErrors} onChange={handleTomadorChange} />
             </div>
           </motion.div>
@@ -307,18 +301,13 @@ export function DatosRiesgo(): React.JSX.Element {
       </AnimatePresence>
 
       {/* Section 4: Asegurado */}
-      <SectionHeader icon={Shield} title="Datos del Asegurado" subtitle="Información de la persona asegurada"
-        stepNumber={4} isComplete={isSection4Complete} isOpen={openSections.has(4)}
+      <SectionHeader icon={Shield} title="Datos del Asegurado" subtitle="Persona que será protegida por la póliza"
+        isComplete={isSection4Complete} isOpen={openSections.has(4)}
         onToggle={() => toggleSection(4)} isVisible={isSection3Complete || openSections.has(4)} />
       <AnimatePresence>
         {openSections.has(4) && (isSection3Complete || isSection4Complete) && (
           <motion.div variants={sectionVariants} initial="hidden" animate="visible" exit="exit" className="overflow-hidden">
             <div className="rounded-2xl bg-white border border-gray-100 shadow-xl p-6 md:p-8 space-y-4">
-              <div className="border-l-4 border-[#005931] pl-4 mb-4">
-                <h3 className="text-lg font-bold text-[#002B49]">Datos del Asegurado</h3>
-                <p className="text-gray-500 text-sm">Persona que será protegida por la póliza.</p>
-              </div>
-
               <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
                 <input type="checkbox" checked={isSameAsInsured} onChange={handleSameToggle}
                   className="h-4 w-4 rounded border-gray-300 accent-[#005931]" />
@@ -343,16 +332,12 @@ export function DatosRiesgo(): React.JSX.Element {
 
       {/* Section 5: Datos Financieros + Consentimiento */}
       <SectionHeader icon={Briefcase} title="Datos Financieros" subtitle="Información laboral y económica"
-        stepNumber={5} isComplete={!!dr.ciudad && !!dr.ocupacion} isOpen={openSections.has(5)}
+        isComplete={!!dr.ciudad && !!dr.ocupacion} isOpen={openSections.has(5)}
         onToggle={() => toggleSection(5)} isVisible={isSection4Complete || openSections.has(5)} />
       <AnimatePresence>
         {openSections.has(5) && isSection4Complete && (
           <motion.div variants={sectionVariants} initial="hidden" animate="visible" exit="exit" className="overflow-hidden">
             <div className="rounded-2xl bg-white border border-gray-100 shadow-xl p-6 md:p-8 space-y-6">
-              <div className="border-l-4 border-[#005931] pl-4 mb-2">
-                <h3 className="text-lg font-bold text-[#002B49]">Datos Financieros y Biográficos</h3>
-                <p className="text-gray-500 text-sm">Información laboral y económica del asegurado.</p>
-              </div>
               <DatosFinancieros
                 ingresoMensual={dr.ingresoMensual}
                 onIngresoChange={(value) => updateDatosRiesgo({ ingresoMensual: value })}
