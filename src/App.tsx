@@ -738,14 +738,14 @@ function IntermediaryPortal({ onStartAutos, onStartVida }: { onStartAutos: (prel
       desc: 'Protección total para vehículos particulares y públicos. Emisión digital inmediata.', 
       icon: Car, 
       buttonText: 'Cotizar Autos',
-      onClick: onStartAutos
+      onClick: () => onStartAutos()
     },
     { 
       title: 'Vida', 
       desc: 'Seguros de vida individual y grupo. Respaldo para lo que más importa.', 
       icon: Heart, 
       buttonText: 'Cotizar Vida',
-      onClick: onStartVida
+      onClick: () => onStartVida()
     },
     { 
       title: 'Salud', 
@@ -1300,10 +1300,10 @@ export default function App() {
       nombre: `${formData.tomador.firstName} ${formData.tomador.lastName}`,
       cotizacion: `COT-${newRadicado}`,
       poliza: '',
-      formData: JSON.parse(JSON.stringify({
-        ...formData,
-        documentacion: undefined, // No serializar archivos
-      })),
+      formData: (() => {
+        const { documentacion, ...rest } = formData;
+        return JSON.parse(JSON.stringify(rest));
+      })(),
     });
   };
 
@@ -1436,7 +1436,7 @@ export default function App() {
       <IntermediaryPortal 
         onStartAutos={(preload) => {
           if (preload) {
-            // Pre-populate form with data from consulta
+            // Viene de Consulta: pre-populate y ir directo al formulario
             setFormData(prev => ({
               ...prev,
               tomador: {
@@ -1461,10 +1461,15 @@ export default function App() {
                 isIdValidated: true,
               },
             }));
+            setAppView('form');
+            setActiveNav('Emitir');
+            setCurrentStep(1);
+          } else {
+            // Viene de "Cotizar Autos": ir a la landing page normal
+            setAppView('form');
+            setActiveNav('Inicio');
+            setCurrentStep(1);
           }
-          setAppView('form');
-          setActiveNav('Emitir');
-          setCurrentStep(1);
         }}
         onStartVida={(preload) => {
           setAppView('vida');
