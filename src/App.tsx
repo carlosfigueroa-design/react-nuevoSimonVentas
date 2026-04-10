@@ -366,10 +366,235 @@ function LandingPage({ onConsult }: { onConsult: (data: { plate: string, brand: 
   );
 }
 
+/** Vista de Consulta de cotizaciones y pólizas */
+function ConsultaView({ onStartAutos, onStartVida }: { onStartAutos: () => void; onStartVida: () => void }) {
+  const [tipoId, setTipoId] = useState('');
+  const [numId, setNumId] = useState('');
+  const [numCotizacion, setNumCotizacion] = useState('');
+  const [numPoliza, setNumPoliza] = useState('');
+  const [numConsecutivo, setNumConsecutivo] = useState('');
+  const [ramo, setRamo] = useState('');
+  const [fechaCotizacion, setFechaCotizacion] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchResult, setSearchResult] = useState<null | { found: boolean; ramo: string; nombre: string }>(null);
+
+  const cotizacionHasValue = numCotizacion.trim().length > 0;
+  const polizaHasValue = numPoliza.trim().length > 0;
+
+  const canSearch = ramo && (numCotizacion || numPoliza);
+
+  const handleSearch = () => {
+    setIsSearching(true);
+    setSearchResult(null);
+    // Simular búsqueda
+    setTimeout(() => {
+      setIsSearching(false);
+      if (numId === '1129564302' || numCotizacion || numPoliza) {
+        setSearchResult({ found: true, ramo, nombre: 'Carlos Alberto Figueroa Martínez' });
+      } else {
+        setSearchResult({ found: false, ramo: '', nombre: '' });
+      }
+    }, 1200);
+  };
+
+  const handleOpenResult = () => {
+    if (!searchResult?.found) return;
+    if (searchResult.ramo === 'Autos') onStartAutos();
+    if (searchResult.ramo === 'Vida') onStartVida();
+  };
+
+  const handleReset = () => {
+    setTipoId(''); setNumId(''); setNumCotizacion(''); setNumPoliza('');
+    setNumConsecutivo(''); setRamo(''); setFechaCotizacion('');
+    setSearchResult(null);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-4">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#008F7A]/10">
+          <Search className="h-7 w-7 text-[#008F7A]" />
+        </div>
+        <div>
+          <h2 className="text-3xl font-black text-gray-800">Consulta</h2>
+          <p className="text-gray-500 font-medium">Busca cotizaciones y pólizas por diferentes criterios.</p>
+        </div>
+      </div>
+
+      {/* Formulario de búsqueda */}
+      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 md:p-10">
+        <div className="border-l-4 border-[#008F7A] pl-4 mb-8">
+          <h3 className="text-xl font-bold text-gray-800">Criterios de Búsqueda</h3>
+          <p className="text-sm text-gray-500">Completa los campos para realizar la consulta.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {/* Tipo de identificación */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Tipo de identificación</label>
+            <select value={tipoId} onChange={(e) => setTipoId(e.target.value)}
+              className="sb-ui-select w-full">
+              <option value="">Seleccionar...</option>
+              <option value="CC">Cédula de Ciudadanía</option>
+              <option value="CE">Cédula de Extranjería</option>
+              <option value="NIT">NIT</option>
+              <option value="PA">Pasaporte</option>
+              <option value="TI">Tarjeta de Identidad</option>
+            </select>
+          </div>
+
+          {/* Número de identificación */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Número de identificación</label>
+            <input type="text" value={numId} onChange={(e) => setNumId(e.target.value)}
+              placeholder="Ej: 1129564302" className="sb-ui-input w-full" />
+          </div>
+
+          {/* N° de cotización */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+              N° de cotización <span className="text-red-500">*</span>
+            </label>
+            <input type="text" value={numCotizacion}
+              onChange={(e) => { setNumCotizacion(e.target.value); if (e.target.value) setNumPoliza(''); }}
+              disabled={polizaHasValue}
+              placeholder={polizaHasValue ? 'Inhabilitado (N° póliza activo)' : 'Ej: COT-A1B2C3D4'}
+              className={`sb-ui-input w-full ${polizaHasValue ? 'sb-ui-input--disabled' : ''}`} />
+          </div>
+
+          {/* N° de póliza */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+              N° de póliza <span className="text-red-500">*</span>
+            </label>
+            <input type="text" value={numPoliza}
+              onChange={(e) => { setNumPoliza(e.target.value); if (e.target.value) setNumCotizacion(''); }}
+              disabled={cotizacionHasValue}
+              placeholder={cotizacionHasValue ? 'Inhabilitado (N° cotización activo)' : 'Ej: 1234567890123'}
+              className={`sb-ui-input w-full ${cotizacionHasValue ? 'sb-ui-input--disabled' : ''}`} />
+          </div>
+
+          {/* N° de consecutivo */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">N° de consecutivo</label>
+            <input type="text" value={numConsecutivo} onChange={(e) => setNumConsecutivo(e.target.value)}
+              placeholder="Opcional" className="sb-ui-input w-full" />
+          </div>
+
+          {/* Ramo */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+              Ramo <span className="text-red-500">*</span>
+            </label>
+            <select value={ramo} onChange={(e) => setRamo(e.target.value)}
+              className="sb-ui-select w-full">
+              <option value="">Seleccionar ramo...</option>
+              <option value="Autos">Autos</option>
+              <option value="Vida">Vida</option>
+              <option value="Salud">Salud</option>
+              <option value="Hogar">Hogar</option>
+              <option value="Pyme">Pyme</option>
+            </select>
+          </div>
+
+          {/* Fecha de cotización */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Fecha de cotización</label>
+            <input type="date" value={fechaCotizacion} onChange={(e) => setFechaCotizacion(e.target.value)}
+              className="sb-ui-input w-full" />
+          </div>
+        </div>
+
+        {/* Nota de dependencia */}
+        <div className="mt-4 flex items-start gap-2 text-xs text-gray-400">
+          <AlertCircle size={14} className="shrink-0 mt-0.5" />
+          <span>Los campos N° de cotización y N° de póliza son excluyentes: al diligenciar uno, el otro se inhabilita automáticamente.</span>
+        </div>
+
+        {/* Botones */}
+        <div className="mt-8 flex items-center justify-end gap-3">
+          <button type="button" onClick={handleReset}
+            className="sb-ui-button sb-ui-button--secondary">
+            Limpiar
+          </button>
+          <button type="button" onClick={handleSearch} disabled={!canSearch || isSearching}
+            className={`sb-ui-button sb-ui-button--primary sb-ui-button--fill ${(!canSearch || isSearching) ? 'sb-ui-button--disabled' : ''}`}>
+            {isSearching ? (
+              <><span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2" /> Buscando...</>
+            ) : (
+              <><Search size={16} className="mr-2 inline" /> Consultar</>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Resultado */}
+      <AnimatePresence>
+        {searchResult && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+          >
+            {searchResult.found ? (
+              <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#00C875]/10">
+                    <CheckCircle size={20} className="text-[#00C875]" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-800">Resultado Encontrado</h3>
+                    <p className="text-sm text-gray-500">Se encontró información para los criterios ingresados.</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  <div className="rounded-xl bg-gray-50 p-4">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Nombre</p>
+                    <p className="text-sm font-bold text-gray-800 mt-1">{searchResult.nombre}</p>
+                  </div>
+                  <div className="rounded-xl bg-gray-50 p-4">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Ramo</p>
+                    <p className="text-sm font-bold text-gray-800 mt-1">{searchResult.ramo}</p>
+                  </div>
+                  <div className="rounded-xl bg-gray-50 p-4">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{numCotizacion ? 'N° Cotización' : 'N° Póliza'}</p>
+                    <p className="text-sm font-bold text-gray-800 mt-1">{numCotizacion || numPoliza}</p>
+                  </div>
+                  <div className="rounded-xl bg-gray-50 p-4">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Identificación</p>
+                    <p className="text-sm font-bold text-gray-800 mt-1">{tipoId} {numId}</p>
+                  </div>
+                </div>
+
+                {(searchResult.ramo === 'Autos' || searchResult.ramo === 'Vida') ? (
+                  <button type="button" onClick={handleOpenResult}
+                    className="sb-ui-button sb-ui-button--primary sb-ui-button--fill">
+                    <ExternalLink size={16} className="mr-2 inline" />
+                    Abrir formulario de {searchResult.ramo}
+                  </button>
+                ) : (
+                  <p className="text-sm text-gray-400 italic">El formulario de {searchResult.ramo} estará disponible próximamente.</p>
+                )}
+              </div>
+            ) : (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
+                <AlertCircle size={40} className="mx-auto text-gray-300 mb-3" />
+                <h3 className="text-lg font-bold text-gray-700">Sin resultados</h3>
+                <p className="text-sm text-gray-400 mt-1">No se encontraron registros con los criterios ingresados.</p>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 function IntermediaryPortal({ onStartAutos, onStartVida }: { onStartAutos: () => void; onStartVida: () => void }) {
   const [activeMenu, setActiveMenu] = useState('Inicio');
   const [isGestionOpen, setIsGestionOpen] = useState(true);
-  const [portalView, setPortalView] = useState<'dashboard' | 'cotizar'>('dashboard');
+  const [portalView, setPortalView] = useState<'dashboard' | 'cotizar' | 'consulta'>('dashboard');
 
   const menuItems = [
     { id: 'Inicio', label: 'Inicio', icon: Home },
@@ -379,6 +604,7 @@ function IntermediaryPortal({ onStartAutos, onStartVida }: { onStartAutos: () =>
       icon: FileText, 
       subItems: [
         { id: 'cotizar', label: 'Cotizar y emitir', icon: ShieldCheck },
+        { id: 'consulta', label: 'Consulta', icon: Search },
         { id: 'modificar', label: 'Modificar', icon: FileCheck },
         { id: 'incluir', label: 'Incluir riesgos', icon: Plus },
         { id: 'prevision', label: 'Previsión', icon: AlertCircle },
@@ -491,6 +717,7 @@ function IntermediaryPortal({ onStartAutos, onStartVida }: { onStartAutos: () =>
                       onClick={() => {
                         setActiveMenu(sub.id);
                         if (sub.id === 'cotizar') setPortalView('cotizar');
+                        if (sub.id === 'consulta') setPortalView('consulta');
                       }}
                       className={`w-full flex items-center gap-3 p-2 rounded-lg text-sm transition-colors ${
                         activeMenu === sub.id ? 'bg-[#E6F4F1] text-[#008F7A]' : 'text-gray-500 hover:bg-gray-50'
@@ -614,7 +841,7 @@ function IntermediaryPortal({ onStartAutos, onStartVida }: { onStartAutos: () =>
                   </div>
                 </div>
               </motion.div>
-            ) : (
+            ) : portalView === 'cotizar' ? (
               <motion.div
                 key="cotizar"
                 initial={{ opacity: 0, y: 10 }}
@@ -661,7 +888,25 @@ function IntermediaryPortal({ onStartAutos, onStartVida }: { onStartAutos: () =>
                   ))}
                 </div>
               </motion.div>
-            )}
+            ) : portalView === 'consulta' ? (
+              <motion.div
+                key="consulta"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="space-y-8"
+              >
+                <div className="flex items-center gap-2 text-xs font-bold text-gray-400">
+                  <Home size={12} />
+                  <ChevronRight size={12} />
+                  <span>Gestión de pólizas</span>
+                  <ChevronRight size={12} />
+                  <span className="text-gray-600">Consulta</span>
+                </div>
+
+                <ConsultaView onStartAutos={onStartAutos} onStartVida={onStartVida} />
+              </motion.div>
+            ) : null}
           </AnimatePresence>
         </main>
       </div>
