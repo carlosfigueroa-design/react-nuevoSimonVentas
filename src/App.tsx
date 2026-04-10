@@ -367,7 +367,7 @@ function LandingPage({ onConsult }: { onConsult: (data: { plate: string, brand: 
 }
 
 /** Vista de Consulta de cotizaciones y pólizas */
-function ConsultaView({ onStartAutos, onStartVida }: { onStartAutos: () => void; onStartVida: () => void }) {
+function ConsultaView({ onStartAutos, onStartVida }: { onStartAutos: (preload?: { idType: string; id: string }) => void; onStartVida: (preload?: { idType: string; id: string }) => void }) {
   const [tipoId, setTipoId] = useState('');
   const [numId, setNumId] = useState('');
   const [numCotizacion, setNumCotizacion] = useState('');
@@ -399,8 +399,9 @@ function ConsultaView({ onStartAutos, onStartVida }: { onStartAutos: () => void;
 
   const handleOpenResult = () => {
     if (!searchResult?.found) return;
-    if (searchResult.ramo === 'Autos') onStartAutos();
-    if (searchResult.ramo === 'Vida') onStartVida();
+    const preload = { idType: tipoId || 'CC', id: numId || '1129564302' };
+    if (searchResult.ramo === 'Autos') onStartAutos(preload);
+    if (searchResult.ramo === 'Vida') onStartVida(preload);
   };
 
   const handleReset = () => {
@@ -591,7 +592,7 @@ function ConsultaView({ onStartAutos, onStartVida }: { onStartAutos: () => void;
   );
 }
 
-function IntermediaryPortal({ onStartAutos, onStartVida }: { onStartAutos: () => void; onStartVida: () => void }) {
+function IntermediaryPortal({ onStartAutos, onStartVida }: { onStartAutos: (preload?: { idType: string; id: string }) => void; onStartVida: (preload?: { idType: string; id: string }) => void }) {
   const [activeMenu, setActiveMenu] = useState('Inicio');
   const [isGestionOpen, setIsGestionOpen] = useState(true);
   const [portalView, setPortalView] = useState<'dashboard' | 'cotizar' | 'consulta'>('dashboard');
@@ -1311,12 +1312,39 @@ export default function App() {
   if (appView === 'portal') {
     return (
       <IntermediaryPortal 
-        onStartAutos={() => {
+        onStartAutos={(preload) => {
+          if (preload) {
+            // Pre-populate form with data from consulta
+            setFormData(prev => ({
+              ...prev,
+              tomador: {
+                ...prev.tomador,
+                idType: preload.idType === 'CC' ? 'Cédula de ciudadania' : preload.idType,
+                id: preload.id,
+                isIdValidated: true,
+                ...(preload.id === '1129564302' ? {
+                  firstName: 'Carlos Alberto',
+                  lastName: 'Figueroa Martinez',
+                  email: 'carlos123@gmail.com',
+                  phone: '6015632548',
+                } : {}),
+              },
+              asegurado: {
+                ...prev.asegurado,
+                isSameAsTomador: true,
+                idType: preload.idType === 'CC' ? 'Cédula de ciudadania' : preload.idType,
+                id: preload.id,
+                firstName: preload.id === '1129564302' ? 'Carlos Alberto' : '',
+                lastName: preload.id === '1129564302' ? 'Figueroa Martinez' : '',
+                isIdValidated: true,
+              },
+            }));
+          }
           setAppView('form');
-          setActiveNav('Inicio');
+          setActiveNav('Emitir');
           setCurrentStep(1);
         }}
-        onStartVida={() => {
+        onStartVida={(preload) => {
           setAppView('vida');
           setActiveNav('Emitir');
         }}
