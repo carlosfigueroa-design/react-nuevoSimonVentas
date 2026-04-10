@@ -642,37 +642,66 @@ function ConsultaView({ onStartAutos, onStartVida }: { onStartAutos: (preload?: 
                 </div>
               </div>
 
-              {/* Render all form fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {Object.entries(selectedRecord.formData).map(([section, value]) => {
-                  if (!value || section === 'documentacion') return null;
-                  if (typeof value === 'object' && !Array.isArray(value)) {
-                    return Object.entries(value as Record<string, unknown>).map(([field, val]) => {
-                      if (!val || typeof val === 'object') return null;
-                      const label = field.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
-                      return (
-                        <div key={`${section}-${field}`} className="rounded-lg bg-gray-50 px-4 py-3">
-                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{label}</p>
-                          <p className="text-sm font-medium text-gray-800 mt-0.5">{String(val)}</p>
-                        </div>
-                      );
+              {/* Render all form fields by section */}
+              <div className="space-y-6">
+                {Object.entries(selectedRecord.formData).map(([sectionKey, sectionValue]) => {
+                  if (!sectionValue || sectionKey === 'documentacion') return null;
+
+                  const sectionLabel = sectionKey
+                    .replace(/([A-Z])/g, ' $1')
+                    .replace(/^./, s => s.toUpperCase())
+                    .trim();
+
+                  // Flatten all fields from this section (including nested objects)
+                  const fields: { label: string; value: string }[] = [];
+
+                  const extractFields = (obj: unknown, prefix = '') => {
+                    if (!obj || typeof obj !== 'object') return;
+                    if (Array.isArray(obj)) {
+                      obj.forEach((item, i) => {
+                        if (typeof item === 'object' && item !== null) {
+                          Object.entries(item as Record<string, unknown>).forEach(([k, v]) => {
+                            if (v !== null && v !== undefined && v !== '' && typeof v !== 'object') {
+                              const label = k.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
+                              fields.push({ label: `${prefix}${label} (${i + 1})`, value: String(v) });
+                            }
+                          });
+                        } else if (item !== null && item !== undefined && item !== '') {
+                          fields.push({ label: `${prefix}Item ${i + 1}`, value: String(item) });
+                        }
+                      });
+                      return;
+                    }
+                    Object.entries(obj as Record<string, unknown>).forEach(([key, val]) => {
+                      if (val === null || val === undefined || val === '' || val === 0 || val === false) return;
+                      if (typeof val === 'object' && !Array.isArray(val)) {
+                        extractFields(val, `${key === 'tomador' || key === 'asegurado' ? key.charAt(0).toUpperCase() + key.slice(1) + ' — ' : ''}`);
+                      } else if (Array.isArray(val)) {
+                        extractFields(val, key.charAt(0).toUpperCase() + key.slice(1) + ' — ');
+                      } else {
+                        const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
+                        fields.push({ label: `${prefix}${label}`, value: String(val) });
+                      }
                     });
-                  }
-                  if (Array.isArray(value)) {
-                    return (
-                      <div key={section} className="rounded-lg bg-gray-50 px-4 py-3 md:col-span-2 lg:col-span-3">
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">{section}</p>
-                        {(value as Array<Record<string, unknown>>).map((item, i) => (
-                          <p key={i} className="text-sm text-gray-700">{Object.values(item).filter(v => v).join(' · ')}</p>
+                  };
+
+                  extractFields(sectionValue);
+
+                  if (fields.length === 0) return null;
+
+                  return (
+                    <div key={sectionKey}>
+                      <h4 className="text-xs font-bold text-[#008F7A] uppercase tracking-widest mb-3 border-b border-gray-100 pb-2">
+                        {sectionLabel}
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                        {fields.map((f, i) => (
+                          <div key={i} className="rounded-lg bg-gray-50 px-4 py-2.5">
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{f.label}</p>
+                            <p className="text-sm font-medium text-gray-800 mt-0.5 truncate" title={f.value}>{f.value}</p>
+                          </div>
                         ))}
                       </div>
-                    );
-                  }
-                  const label = section.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
-                  return (
-                    <div key={section} className="rounded-lg bg-gray-50 px-4 py-3">
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{label}</p>
-                      <p className="text-sm font-medium text-gray-800 mt-0.5">{String(value)}</p>
                     </div>
                   );
                 })}
