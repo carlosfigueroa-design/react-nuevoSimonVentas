@@ -8,6 +8,7 @@ import { useWizard, useQuoteSession } from '../../hooks';
 import { formatCurrency, formatDate, generatePolicyNumber } from '../../utils';
 import { generateQuotePDF } from '../../services/pdfService';
 import { initiateIssuance } from '../../services/quoteService';
+import { saveRadicado } from '../../../services/radicadoStore';
 import { PriceHero, PDFPreviewModal, EmailModal, BentoCard } from '../ui';
 import { EmisionExito } from './EmisionExito';
 import { PLAN_OPTIONS } from '../../constants';
@@ -80,6 +81,21 @@ export function Resumen(): React.JSX.Element {
           },
         });
         setIssueStatus('success');
+
+        // Guardar radicado con todos los datos del formulario de Vida
+        saveRadicado({
+          radicado: newPolicyNumber,
+          ramo: 'Vida',
+          fecha: new Date().toISOString(),
+          identificacion: {
+            tipo: datosRiesgo.tomador.documentType,
+            numero: datosRiesgo.tomador.documentNumber,
+          },
+          nombre: `${datosRiesgo.tomador.nombres} ${datosRiesgo.tomador.apellidos}`,
+          cotizacion: quoteNumber,
+          poliza: newPolicyNumber,
+          formData: JSON.parse(JSON.stringify(state.stepData)),
+        });
       } else {
         setIssueStatus('error');
       }

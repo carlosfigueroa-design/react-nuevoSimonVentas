@@ -2,6 +2,7 @@ import { useState, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { saveRadicado, searchRadicados, type RadicadoRecord } from './services/radicadoStore';
 
 const VidaApp = lazy(() => import('./vidaApp/App'));
 import { 
@@ -376,7 +377,9 @@ function ConsultaView({ onStartAutos, onStartVida }: { onStartAutos: (preload?: 
   const [ramo, setRamo] = useState('');
   const [fechaCotizacion, setFechaCotizacion] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-  const [searchResult, setSearchResult] = useState<null | { found: boolean; ramo: string; nombre: string }>(null);
+  const [searchResults, setSearchResults] = useState<RadicadoRecord[]>([]);
+  const [noResults, setNoResults] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<RadicadoRecord | null>(null);
 
   const cotizacionHasValue = numCotizacion.trim().length > 0;
   const polizaHasValue = numPoliza.trim().length > 0;
@@ -385,29 +388,52 @@ function ConsultaView({ onStartAutos, onStartVida }: { onStartAutos: (preload?: 
 
   const handleSearch = () => {
     setIsSearching(true);
-    setSearchResult(null);
-    // Simular búsqueda
+    setSearchResults([]);
+    setNoResults(false);
+    setSelectedRecord(null);
+
     setTimeout(() => {
       setIsSearching(false);
-      if (numId === '1129564302' || numCotizacion || numPoliza) {
-        setSearchResult({ found: true, ramo, nombre: 'Carlos Alberto Figueroa Martínez' });
+      // Buscar en el store real
+      const results = searchRadicados({
+        identificacion: numId || undefined,
+        cotizacion: numCotizacion ? `COT-${numCotizacion.replace('COT-', '')}` : undefined,
+        poliza: numPoliza || undefined,
+        ramo: ramo || undefined,
+      });
+
+      if (results.length > 0) {
+        setSearchResults(results);
       } else {
-        setSearchResult({ found: false, ramo: '', nombre: '' });
+        // Fallback: si no hay radicados guardados pero la cédula es la de prueba
+        if (numId === '1129564302' || numCotizacion || numPoliza) {
+          setSearchResults([{
+            radicado: 'SIN-RADICADO',
+            ramo: ramo as 'Autos' | 'Vida',
+            fecha: new Date().toISOString(),
+            identificacion: { tipo: tipoId || 'CC', numero: numId || '1129564302' },
+            nombre: 'Carlos Alberto Figueroa Martínez',
+            cotizacion: numCotizacion || '',
+            poliza: numPoliza || '',
+            formData: {},
+          }]);
+        } else {
+          setNoResults(true);
+        }
       }
-    }, 1200);
+    }, 1000);
   };
 
-  const handleOpenResult = () => {
-    if (!searchResult?.found) return;
-    const preload = { idType: tipoId || 'CC', id: numId || '1129564302' };
-    if (searchResult.ramo === 'Autos') onStartAutos(preload);
-    if (searchResult.ramo === 'Vida') onStartVida(preload);
+  const handleOpenResult = (record: RadicadoRecord) => {
+    const preload = { idType: record.identificacion.tipo || 'CC', id: record.identificacion.numero || '1129564302' };
+    if (record.ramo === 'Autos') onStartAutos(preload);
+    if (record.ramo === 'Vida') onStartVida(preload);
   };
 
   const handleReset = () => {
     setTipoId(''); setNumId(''); setNumCotizacion(''); setNumPoliza('');
     setNumConsecutivo(''); setRamo(''); setFechaCotizacion('');
-    setSearchResult(null);
+    setSearchResults([]); setNoResults(false); setSelectedRecord(null);
   };
 
   return (
@@ -529,62 +555,143 @@ function ConsultaView({ onStartAutos, onStartVida }: { onStartAutos: (preload?: 
         </div>
       </div>
 
-      {/* Resultado */}
+      {/* Resultados */}
       <AnimatePresence>
-        {searchResult && (
+        {searchResults.length > 0 && !selectedRecord && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
           >
-            {searchResult.found ? (
-              <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#00C875]/10">
-                    <CheckCircle size={20} className="text-[#00C875]" />
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#00C875]/10">
+                  <CheckCircle size={20} className="text-[#00C875]" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-800">{searchResults.length} resultado(s) encontrado(s)</h3>
+                  <p className="text-sm text-gray-500">Selecciona un registro para ver los detalles o abrir el formulario.</p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {searchResults.map((record) => (
+                  <div key={record.radicado} className="flex items-center justify-between rounded-xl border border-gray-100 p-4 hover:shadow-md transition-all">
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#008F7A]/10 text-[#008F7A]">
+                        {record.ramo === 'Autos' ? <Car size={20} /> : <Heart size={20} />}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-gray-800">{record.nombre}</p>
+                        <p className="text-xs text-gray-400">
+                          Radicado: {record.radicado} · {record.ramo} · {record.identificacion.tipo} {record.identificacion.numero}
+                          {record.cotizacion && ` · ${record.cotizacion}`}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      {Object.keys(record.formData).length > 0 && (
+                        <button type="button" onClick={() => setSelectedRecord(record)}
+                          className="sb-ui-button sb-ui-button--secondary sb-ui-button--small">
+                          Ver detalle
+                        </button>
+                      )}
+                      {(record.ramo === 'Autos' || record.ramo === 'Vida') && (
+                        <button type="button" onClick={() => handleOpenResult(record)}
+                          className="sb-ui-button sb-ui-button--primary sb-ui-button--fill sb-ui-button--small">
+                          <ExternalLink size={14} className="mr-1 inline" />
+                          Abrir {record.ramo}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Detalle del radicado seleccionado */}
+        {selectedRecord && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+          >
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#008F7A]/10">
+                    {selectedRecord.ramo === 'Autos' ? <Car size={20} className="text-[#008F7A]" /> : <Heart size={20} className="text-[#008F7A]" />}
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-gray-800">Resultado Encontrado</h3>
-                    <p className="text-sm text-gray-500">Se encontró información para los criterios ingresados.</p>
+                    <h3 className="text-lg font-bold text-gray-800">Detalle del Radicado {selectedRecord.radicado}</h3>
+                    <p className="text-sm text-gray-500">{selectedRecord.ramo} · {selectedRecord.nombre} · {new Date(selectedRecord.fecha).toLocaleDateString()}</p>
                   </div>
                 </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                  <div className="rounded-xl bg-gray-50 p-4">
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Nombre</p>
-                    <p className="text-sm font-bold text-gray-800 mt-1">{searchResult.nombre}</p>
-                  </div>
-                  <div className="rounded-xl bg-gray-50 p-4">
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Ramo</p>
-                    <p className="text-sm font-bold text-gray-800 mt-1">{searchResult.ramo}</p>
-                  </div>
-                  <div className="rounded-xl bg-gray-50 p-4">
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{numCotizacion ? 'N° Cotización' : 'N° Póliza'}</p>
-                    <p className="text-sm font-bold text-gray-800 mt-1">{numCotizacion || numPoliza}</p>
-                  </div>
-                  <div className="rounded-xl bg-gray-50 p-4">
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Identificación</p>
-                    <p className="text-sm font-bold text-gray-800 mt-1">{tipoId} {numId}</p>
-                  </div>
-                </div>
-
-                {(searchResult.ramo === 'Autos' || searchResult.ramo === 'Vida') ? (
-                  <button type="button" onClick={handleOpenResult}
-                    className="sb-ui-button sb-ui-button--primary sb-ui-button--fill">
-                    <ExternalLink size={16} className="mr-2 inline" />
-                    Abrir formulario de {searchResult.ramo}
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => setSelectedRecord(null)}
+                    className="sb-ui-button sb-ui-button--secondary sb-ui-button--small">
+                    Volver
                   </button>
-                ) : (
-                  <p className="text-sm text-gray-400 italic">El formulario de {searchResult.ramo} estará disponible próximamente.</p>
-                )}
+                  <button type="button" onClick={() => handleOpenResult(selectedRecord)}
+                    className="sb-ui-button sb-ui-button--primary sb-ui-button--fill sb-ui-button--small">
+                    <ExternalLink size={14} className="mr-1 inline" />
+                    Abrir formulario
+                  </button>
+                </div>
               </div>
-            ) : (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
-                <AlertCircle size={40} className="mx-auto text-gray-300 mb-3" />
-                <h3 className="text-lg font-bold text-gray-700">Sin resultados</h3>
-                <p className="text-sm text-gray-400 mt-1">No se encontraron registros con los criterios ingresados.</p>
+
+              {/* Render all form fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {Object.entries(selectedRecord.formData).map(([section, value]) => {
+                  if (!value || section === 'documentacion') return null;
+                  if (typeof value === 'object' && !Array.isArray(value)) {
+                    return Object.entries(value as Record<string, unknown>).map(([field, val]) => {
+                      if (!val || typeof val === 'object') return null;
+                      const label = field.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
+                      return (
+                        <div key={`${section}-${field}`} className="rounded-lg bg-gray-50 px-4 py-3">
+                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{label}</p>
+                          <p className="text-sm font-medium text-gray-800 mt-0.5">{String(val)}</p>
+                        </div>
+                      );
+                    });
+                  }
+                  if (Array.isArray(value)) {
+                    return (
+                      <div key={section} className="rounded-lg bg-gray-50 px-4 py-3 md:col-span-2 lg:col-span-3">
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">{section}</p>
+                        {(value as Array<Record<string, unknown>>).map((item, i) => (
+                          <p key={i} className="text-sm text-gray-700">{Object.values(item).filter(v => v).join(' · ')}</p>
+                        ))}
+                      </div>
+                    );
+                  }
+                  const label = section.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
+                  return (
+                    <div key={section} className="rounded-lg bg-gray-50 px-4 py-3">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{label}</p>
+                      <p className="text-sm font-medium text-gray-800 mt-0.5">{String(value)}</p>
+                    </div>
+                  );
+                })}
               </div>
-            )}
+            </div>
+          </motion.div>
+        )}
+
+        {noResults && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+          >
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
+              <AlertCircle size={40} className="mx-auto text-gray-300 mb-3" />
+              <h3 className="text-lg font-bold text-gray-700">Sin resultados</h3>
+              <p className="text-sm text-gray-400 mt-1">No se encontraron registros con los criterios ingresados.</p>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -1183,6 +1290,21 @@ export default function App() {
     setRadicado(newRadicado);
     setIsSubmitted(true);
     generatePDF(newRadicado);
+
+    // Guardar radicado con todos los datos del formulario
+    saveRadicado({
+      radicado: newRadicado,
+      ramo: 'Autos',
+      fecha: new Date().toISOString(),
+      identificacion: { tipo: formData.tomador.idType, numero: formData.tomador.id },
+      nombre: `${formData.tomador.firstName} ${formData.tomador.lastName}`,
+      cotizacion: `COT-${newRadicado}`,
+      poliza: '',
+      formData: JSON.parse(JSON.stringify({
+        ...formData,
+        documentacion: undefined, // No serializar archivos
+      })),
+    });
   };
 
   const generatePDF = (radicadoNum: string) => {
