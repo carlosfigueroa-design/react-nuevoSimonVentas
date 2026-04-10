@@ -80,10 +80,15 @@ export function searchRadicados(criteria: {
     results = results.filter(r => r.identificacion.numero === criteria.identificacion);
   }
   if (criteria.cotizacion) {
-    results = results.filter(r => r.cotizacion === criteria.cotizacion);
+    const q = criteria.cotizacion.replace('COT-', '');
+    results = results.filter(r =>
+      r.cotizacion?.includes(q) || r.radicado.includes(q)
+    );
   }
   if (criteria.poliza) {
-    results = results.filter(r => r.poliza === criteria.poliza);
+    results = results.filter(r =>
+      r.poliza === criteria.poliza || r.radicado === criteria.poliza
+    );
   }
   if (criteria.ramo) {
     results = results.filter(r => r.ramo === criteria.ramo);

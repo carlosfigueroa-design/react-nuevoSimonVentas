@@ -397,7 +397,7 @@ function ConsultaView({ onStartAutos, onStartVida }: { onStartAutos: (preload?: 
       // Buscar en el store real
       const results = searchRadicados({
         identificacion: numId || undefined,
-        cotizacion: numCotizacion ? `COT-${numCotizacion.replace('COT-', '')}` : undefined,
+        cotizacion: numCotizacion || undefined,
         poliza: numPoliza || undefined,
         ramo: ramo || undefined,
       });
@@ -673,11 +673,14 @@ function ConsultaView({ onStartAutos, onStartVida }: { onStartAutos: (preload?: 
                       return;
                     }
                     Object.entries(obj as Record<string, unknown>).forEach(([key, val]) => {
-                      if (val === null || val === undefined || val === '' || val === 0 || val === false) return;
+                      if (val === null || val === undefined || val === '') return;
                       if (typeof val === 'object' && !Array.isArray(val)) {
-                        extractFields(val, `${key === 'tomador' || key === 'asegurado' ? key.charAt(0).toUpperCase() + key.slice(1) + ' — ' : ''}`);
+                        const sectionPrefix = ['tomador', 'asegurado', 'vehiculo', 'conductorHabitual', 'coberturas', 'responsabilidadCivil', 'deducibles', 'beneficiarioOneroso'].includes(key)
+                          ? key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1') + ' — '
+                          : prefix;
+                        extractFields(val, sectionPrefix);
                       } else if (Array.isArray(val)) {
-                        extractFields(val, key.charAt(0).toUpperCase() + key.slice(1) + ' — ');
+                        extractFields(val, key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1') + ' — ');
                       } else {
                         const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
                         fields.push({ label: `${prefix}${label}`, value: String(val) });
