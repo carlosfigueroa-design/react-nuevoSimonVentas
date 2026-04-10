@@ -485,7 +485,7 @@ function ConsultaView({ onStartAutos, onStartVida }: { onStartAutos: (preload?: 
             <input type="text" value={numCotizacion}
               onChange={(e) => { setNumCotizacion(e.target.value); if (e.target.value) setNumPoliza(''); }}
               disabled={polizaHasValue}
-              placeholder={polizaHasValue ? 'Inhabilitado (N° póliza activo)' : 'Ej: COT-A1B2C3D4'}
+              placeholder={polizaHasValue ? 'Inhabilitado (N° póliza activo)' : 'Ej: 8379084'}
               className={`sb-ui-input w-full ${polizaHasValue ? 'sb-ui-input--disabled' : ''}`} />
           </div>
 
@@ -645,50 +645,46 @@ function ConsultaView({ onStartAutos, onStartVida }: { onStartAutos: (preload?: 
               {/* Render all form fields by section */}
               <div className="space-y-6">
                 {Object.entries(selectedRecord.formData).map(([sectionKey, sectionValue]) => {
-                  if (!sectionValue || sectionKey === 'documentacion') return null;
+                  if (sectionValue === null || sectionValue === undefined || sectionKey === 'documentacion') return null;
 
                   const sectionLabel = sectionKey
                     .replace(/([A-Z])/g, ' $1')
                     .replace(/^./, s => s.toUpperCase())
                     .trim();
 
-                  // Flatten all fields from this section (including nested objects)
+                  // Collect all displayable fields
                   const fields: { label: string; value: string }[] = [];
 
-                  const extractFields = (obj: unknown, prefix = '') => {
-                    if (!obj || typeof obj !== 'object') return;
+                  const flatten = (obj: unknown, prefix: string) => {
+                    if (obj === null || obj === undefined) return;
                     if (Array.isArray(obj)) {
-                      obj.forEach((item, i) => {
-                        if (typeof item === 'object' && item !== null) {
-                          Object.entries(item as Record<string, unknown>).forEach(([k, v]) => {
-                            if (v !== null && v !== undefined && v !== '' && typeof v !== 'object') {
-                              const label = k.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
-                              fields.push({ label: `${prefix}${label} (${i + 1})`, value: String(v) });
-                            }
-                          });
-                        } else if (item !== null && item !== undefined && item !== '') {
-                          fields.push({ label: `${prefix}Item ${i + 1}`, value: String(item) });
+                      obj.forEach((item, idx) => {
+                        if (item && typeof item === 'object') {
+                          flatten(item, `${prefix}#${idx + 1} `);
+                        } else if (item !== null && item !== undefined && String(item) !== '') {
+                          fields.push({ label: `${prefix}#${idx + 1}`, value: String(item) });
                         }
                       });
                       return;
                     }
-                    Object.entries(obj as Record<string, unknown>).forEach(([key, val]) => {
-                      if (val === null || val === undefined || val === '') return;
-                      if (typeof val === 'object' && !Array.isArray(val)) {
-                        const sectionPrefix = ['tomador', 'asegurado', 'vehiculo', 'conductorHabitual', 'coberturas', 'responsabilidadCivil', 'deducibles', 'beneficiarioOneroso'].includes(key)
-                          ? key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1') + ' — '
-                          : prefix;
-                        extractFields(val, sectionPrefix);
-                      } else if (Array.isArray(val)) {
-                        extractFields(val, key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1') + ' — ');
-                      } else {
-                        const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
-                        fields.push({ label: `${prefix}${label}`, value: String(val) });
-                      }
-                    });
+                    if (typeof obj === 'object') {
+                      Object.entries(obj as Record<string, unknown>).forEach(([k, v]) => {
+                        if (v === null || v === undefined) return;
+                        const cleanLabel = k.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
+                        if (typeof v === 'object') {
+                          flatten(v, `${prefix}${cleanLabel} — `);
+                        } else if (String(v) !== '') {
+                          fields.push({ label: `${prefix}${cleanLabel}`, value: String(v) });
+                        }
+                      });
+                      return;
+                    }
+                    if (String(obj) !== '') {
+                      fields.push({ label: prefix || sectionLabel, value: String(obj) });
+                    }
                   };
 
-                  extractFields(sectionValue);
+                  flatten(sectionValue, '');
 
                   if (fields.length === 0) return null;
 
@@ -701,7 +697,7 @@ function ConsultaView({ onStartAutos, onStartVida }: { onStartAutos: (preload?: 
                         {fields.map((f, i) => (
                           <div key={i} className="rounded-lg bg-gray-50 px-4 py-2.5">
                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{f.label}</p>
-                            <p className="text-sm font-medium text-gray-800 mt-0.5 truncate" title={f.value}>{f.value}</p>
+                            <p className="text-sm font-medium text-gray-800 mt-0.5 break-words" title={f.value}>{f.value}</p>
                           </div>
                         ))}
                       </div>
@@ -1330,7 +1326,7 @@ export default function App() {
       fecha: new Date().toISOString(),
       identificacion: { tipo: formData.tomador.idType, numero: formData.tomador.id },
       nombre: `${formData.tomador.firstName} ${formData.tomador.lastName}`,
-      cotizacion: `COT-${newRadicado}`,
+      cotizacion: newRadicado,
       poliza: '',
       formData: (() => {
         const { documentacion, ...rest } = formData;
