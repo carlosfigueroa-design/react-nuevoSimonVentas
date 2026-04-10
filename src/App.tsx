@@ -658,10 +658,11 @@ function ConsultaView({ onStartAutos, onStartVida }: { onStartAutos: (preload?: 
                   const flatten = (obj: unknown, prefix: string) => {
                     if (obj === null || obj === undefined) return;
                     if (Array.isArray(obj)) {
+                      if (obj.length === 0) return;
                       obj.forEach((item, idx) => {
                         if (item && typeof item === 'object') {
                           flatten(item, `${prefix}#${idx + 1} `);
-                        } else if (item !== null && item !== undefined && String(item) !== '') {
+                        } else if (item !== null && item !== undefined) {
                           fields.push({ label: `${prefix}#${idx + 1}`, value: String(item) });
                         }
                       });
@@ -671,16 +672,20 @@ function ConsultaView({ onStartAutos, onStartVida }: { onStartAutos: (preload?: 
                       Object.entries(obj as Record<string, unknown>).forEach(([k, v]) => {
                         if (v === null || v === undefined) return;
                         const cleanLabel = k.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
-                        if (typeof v === 'object') {
+                        if (typeof v === 'object' && v !== null) {
                           flatten(v, `${prefix}${cleanLabel} — `);
-                        } else if (String(v) !== '') {
-                          fields.push({ label: `${prefix}${cleanLabel}`, value: String(v) });
+                        } else {
+                          const strVal = String(v);
+                          if (strVal !== '') {
+                            fields.push({ label: `${prefix}${cleanLabel}`, value: strVal });
+                          }
                         }
                       });
                       return;
                     }
-                    if (String(obj) !== '') {
-                      fields.push({ label: prefix || sectionLabel, value: String(obj) });
+                    const strVal = String(obj);
+                    if (strVal !== '') {
+                      fields.push({ label: prefix || sectionLabel, value: strVal });
                     }
                   };
 
@@ -1329,8 +1334,17 @@ export default function App() {
       cotizacion: newRadicado,
       poliza: '',
       formData: (() => {
-        const { documentacion, ...rest } = formData;
-        return JSON.parse(JSON.stringify(rest));
+        // Serializar todo excepto documentacion (tiene File objects)
+        const clean: Record<string, unknown> = {};
+        for (const [key, val] of Object.entries(formData)) {
+          if (key === 'documentacion') continue;
+          try {
+            clean[key] = JSON.parse(JSON.stringify(val));
+          } catch {
+            clean[key] = String(val);
+          }
+        }
+        return clean;
       })(),
     });
   };
