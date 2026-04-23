@@ -3,8 +3,10 @@ import { motion, AnimatePresence } from 'motion/react';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { saveRadicado, searchRadicados, type RadicadoRecord } from './services/radicadoStore';
+import { ModificacionesView } from './components/ModificacionesView';
 
 const VidaApp = lazy(() => import('./vidaApp/App'));
+import { ModificacionesView } from './components/ModificacionesView';
 import { 
   Car, 
   User, 
