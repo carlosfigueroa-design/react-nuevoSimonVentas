@@ -349,6 +349,63 @@ export function ModificacionesView() {
 
   const handleSelectPoliza = useCallback((poliza: PolizaConsultada) => {
     setSelectedPoliza(poliza);
+
+    // Precargar TODOS los datos de la póliza para modificación
+    setTomador({
+      tipoDocumento: 'CC',
+      numeroDocumento: '1129564302',
+      nombres: 'CARLOS ALBERTO',
+      apellidos: 'FIGUEROA MARTINEZ',
+      correo: 'carlos123@gmail.com',
+      telefono: '6015632548',
+      autorizaDatos: true,
+    });
+
+    setVehiculo({
+      placa: 'EMQ706',
+      codigoMarca: 'CHEVROLET EQUINOX',
+      modelo: '2025',
+      motor: 'PE21925883',
+      chasis: 'JM7KF2W7AS0102684',
+      color: 'Blanco',
+      valorComercial: '290.000.000',
+      valorAccesorios: '0',
+      usoVehiculo: 'particular',
+      esNuevo: false,
+      cambiarVehiculo: false,
+    });
+
+    setBeneficiario({
+      esOneroso: true,
+      tipoIdentificacion: 'NIT',
+      numeroIdentificacion: '860034313',
+      razonSocial: 'BANCO DAVIVIENDA S.A.',
+    });
+
+    setCoberturas({
+      alternativaCobertura: '43',
+      opcionAutos: '1',
+      pequenosAccesorios: true,
+      movilidad360: false,
+      asistencia: 'familiar',
+    });
+
+    setResponsabilidadCivil({
+      rcExtracontractual: '2000',
+      deducibleRC: '0',
+      rcSuplementaria: '',
+    });
+
+    setDeducibles({
+      parcialDanos: '10-1',
+      coberturaHurto: '10-1',
+      totalDanos: '10-1',
+    });
+
+    setObservaciones('Póliza vigente sin novedades. Modificación solicitada por el intermediario.');
+    setAceptaDeclaracion(false);
+    setFechaVigenciaMod(new Date().toISOString().split('T')[0]);
+
     setPhase('formulario');
   }, []);
 
