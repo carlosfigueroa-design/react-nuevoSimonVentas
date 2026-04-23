@@ -735,7 +735,7 @@ function ConsultaView({ onStartAutos, onStartVida }: { onStartAutos: (preload?: 
 function IntermediaryPortal({ onStartAutos, onStartVida }: { onStartAutos: (preload?: { idType: string; id: string }) => void; onStartVida: (preload?: { idType: string; id: string }) => void }) {
   const [activeMenu, setActiveMenu] = useState('Inicio');
   const [isGestionOpen, setIsGestionOpen] = useState(true);
-  const [portalView, setPortalView] = useState<'dashboard' | 'cotizar' | 'consulta'>('dashboard');
+  const [portalView, setPortalView] = useState<'dashboard' | 'cotizar' | 'consulta' | 'modificar'>('dashboard');
 
   const menuItems = [
     { id: 'Inicio', label: 'Inicio', icon: Home },
@@ -859,6 +859,7 @@ function IntermediaryPortal({ onStartAutos, onStartVida }: { onStartAutos: (prel
                         setActiveMenu(sub.id);
                         if (sub.id === 'cotizar') setPortalView('cotizar');
                         if (sub.id === 'consulta') setPortalView('consulta');
+                        if (sub.id === 'modificar') setPortalView('modificar');
                       }}
                       className={`w-full flex items-center gap-3 p-2 rounded-lg text-sm transition-colors ${
                         activeMenu === sub.id ? 'bg-[#E6F4F1] text-[#008F7A]' : 'text-gray-500 hover:bg-gray-50'
@@ -1046,6 +1047,24 @@ function IntermediaryPortal({ onStartAutos, onStartVida }: { onStartAutos: (prel
                 </div>
 
                 <ConsultaView onStartAutos={onStartAutos} onStartVida={onStartVida} />
+              </motion.div>
+            ) : portalView === 'modificar' ? (
+              <motion.div
+                key="modificar"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="space-y-8"
+              >
+                <div className="flex items-center gap-2 text-xs font-bold text-gray-400">
+                  <Home size={12} />
+                  <ChevronRight size={12} />
+                  <span>Gestión de pólizas</span>
+                  <ChevronRight size={12} />
+                  <span className="text-gray-600">Modificar</span>
+                </div>
+
+                <ModificacionesView />
               </motion.div>
             ) : null}
           </AnimatePresence>
