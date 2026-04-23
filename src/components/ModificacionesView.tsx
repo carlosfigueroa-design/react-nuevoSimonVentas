@@ -89,6 +89,11 @@ const MOCK_TOMADORES: Record<string, { nombres: string; apellidos: string; corre
   '80725151': { nombres: 'ALEJO', apellidos: 'URIBE RUIZ', correo: 'uribealejo56@gmail.com', telefono: '3046381225' },
 };
 
+const MOCK_VEHICULOS: Record<string, { codigoMarca: string; modelo: string; motor: string; chasis: string; color: string; valorComercial: string; valorAccesorios: string; usoVehiculo: string }> = {
+  'EMQ706': { codigoMarca: 'CHEVROLET EQUINOX', modelo: '2025', motor: 'PE21925883', chasis: 'JM7KF2W7AS0102684', color: 'Blanco', valorComercial: '290000000', valorAccesorios: '0', usoVehiculo: 'particular' },
+  'NWK247': { codigoMarca: 'MAZDA CX5 [2] [FL] TOU', modelo: '2025', motor: 'PE21925883', chasis: 'JM7KF2W7AS0102684', color: 'MACHINE GRAY', valorComercial: '159300000', valorAccesorios: '170000', usoVehiculo: 'particular' },
+};
+
 const SUBPRODUCTOS = [
   { value: '251', label: '251 - Vehículos Bolívar' },
   { value: '263', label: '263 - Vehículos Especiales' },
@@ -272,6 +277,23 @@ export function ModificacionesView() {
       }));
     }
   }, [tomador.numeroDocumento]);
+
+  const handlePlacaBlur = useCallback(() => {
+    const found = MOCK_VEHICULOS[vehiculo.placa.toUpperCase()];
+    if (found) {
+      setVehiculo(prev => ({
+        ...prev,
+        codigoMarca: found.codigoMarca,
+        modelo: found.modelo,
+        motor: found.motor,
+        chasis: found.chasis,
+        color: found.color,
+        valorComercial: found.valorComercial,
+        valorAccesorios: found.valorAccesorios,
+        usoVehiculo: found.usoVehiculo,
+      }));
+    }
+  }, [vehiculo.placa]);
 
   const handleConsultar = useCallback(() => {
     setIsSearching(true);
@@ -668,7 +690,8 @@ export function ModificacionesView() {
             <Field label="Placa">
               <input type="text" value={vehiculo.placa}
                 onChange={e => setVehiculo(prev => ({ ...prev, placa: e.target.value.toUpperCase() }))}
-                placeholder="ABC123"
+                onBlur={handlePlacaBlur}
+                placeholder="Ej: EMQ706"
                 className="sb-ui-input w-full" />
             </Field>
             <Field label="Código / Descripción marca">
