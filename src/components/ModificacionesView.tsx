@@ -210,7 +210,7 @@ export function ModificacionesView() {
 
   // --- Phase 2: Formulario state ---
   const [selectedPoliza, setSelectedPoliza] = useState<PolizaConsultada | null>(null);
-  const [fechaVigenciaMod, setFechaVigenciaMod] = useState('');
+  const [fechaVigenciaMod, setFechaVigenciaMod] = useState(() => new Date().toISOString().split('T')[0]);
 
   const [tomador, setTomador] = useState<TomadorData>({
     tipoDocumento: 'CC', numeroDocumento: '', nombres: '', apellidos: '',
