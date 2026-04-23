@@ -6,7 +6,6 @@ import { saveRadicado, searchRadicados, type RadicadoRecord } from './services/r
 import { ModificacionesView } from './components/ModificacionesView';
 
 const VidaApp = lazy(() => import('./vidaApp/App'));
-import { ModificacionesView } from './components/ModificacionesView';
 import { 
   Car, 
   User, 
